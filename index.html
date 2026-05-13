@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>スターハンターズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#06000f;display:flex;justify-content:center;padding:20px 0;min-height:100vh;font-family:'Nunito','Hiragino Maru Gothic ProN',sans-serif;}
+#root{width:390px;min-height:680px;background:#0d0020;border-radius:36px;overflow:hidden;box-shadow:0 0 80px rgba(180,0,255,.3),0 30px 80px rgba(0,0,0,.9);position:relative;}
+button{cursor:pointer;font-family:inherit;}
+button:active{transform:scale(.95);}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes twinkle{0%,100%{opacity:.1}50%{opacity:.7}}
+@keyframes pop{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-12px)}75%{transform:translateX(12px)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pAtk{0%{transform:translateX(0)}35%{transform:translateX(52px)}65%{transform:translateX(32px)}100%{transform:translateX(0)}}
+@keyframes eAtk{0%{transform:translateX(0)}35%{transform:translateX(-52px)}65%{transform:translateX(-32px)}100%{transform:translateX(0)}}
+@keyframes beHurt{0%{filter:none;transform:translateX(0)}20%{filter:brightness(4);transform:translateX(-15px)}45%{filter:brightness(2);transform:translateX(10px)}70%{transform:translateX(-8px)}100%{filter:none;transform:translateX(0)}}
+@keyframes victory{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-20px) rotate(-7deg)}70%{transform:translateY(-10px) rotate(7deg)}}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes fup{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.5)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes titlePop{0%{opacity:0;transform:scale(.5) translateY(40px)}60%{transform:scale(1.1) translateY(-5px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes shimmer{0%,100%{opacity:.7}50%{opacity:1}}
+.af{animation:float 2.5s ease-in-out infinite;}
+.apAtk{animation:pAtk .65s ease forwards;}
+.aeAtk{animation:eAtk .65s ease forwards;}
+.ahurt{animation:beHurt .65s ease forwards;}
+.avic{animation:victory 1.4s ease-in-out infinite;}
+.aidle{animation:idle 2.8s ease-in-out infinite;}
+.ashake{animation:shake .45s ease;}
+.apop{animation:pop .5s cubic-bezier(.17,.67,.45,1.4) forwards;}
+.afin{animation:fadeIn .4s ease;}
+.apulse{animation:pulse 1.8s ease-in-out infinite;}
+.afup{animation:fup 1.2s ease forwards;}
+.atpop{animation:titlePop .6s cubic-bezier(.17,.67,.45,1.4) forwards;}
+.ashimmer{animation:shimmer 1.5s ease-in-out infinite;}
+/* ── ATTACK EFFECTS v5 ── */
+@keyframes flyR{0%{opacity:0;transform:translateX(0) translateY(0) scale(.3)}15%{opacity:1;transform:translateX(12px) translateY(-6px) scale(1.3)}85%{opacity:1;transform:translateX(170px) translateY(-18px) scale(1)}100%{opacity:0;transform:translateX(210px) translateY(-28px) scale(.6)}}
+@keyframes flyL{0%{opacity:0;transform:translateX(0) translateY(0) scale(.3)}15%{opacity:1;transform:translateX(-12px) translateY(-6px) scale(1.3)}85%{opacity:1;transform:translateX(-170px) translateY(-18px) scale(1)}100%{opacity:0;transform:translateX(-210px) translateY(-28px) scale(.6)}}
+@keyframes hitB{0%{transform:translate(-50%,-50%) scale(0);opacity:1}40%{transform:translate(-50%,-50%) scale(1.6);opacity:.9}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
+@keyframes hitBig{0%{transform:translate(-50%,-50%) scale(0);opacity:1}30%{transform:translate(-50%,-50%) scale(1.2);opacity:1}60%{transform:translate(-50%,-50%) scale(2.2);opacity:.8}100%{transform:translate(-50%,-50%) scale(3.5);opacity:0}}
+@keyframes dmgF{0%{transform:translateX(-50%) translateY(0) scale(.3);opacity:0}15%{transform:translateX(-50%) translateY(-18px) scale(1.6);opacity:1}75%{transform:translateX(-50%) translateY(-62px) scale(1.1);opacity:1}100%{transform:translateX(-50%) translateY(-85px) scale(.9);opacity:0}}
+@keyframes atkN{0%{opacity:0;transform:translateX(-50%) translateY(8px) scale(.7)}20%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.1)}70%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-14px)}}
+@keyframes bigSh{0%,100%{transform:translateX(0) translateY(0)}15%{transform:translateX(-8px) translateY(-3px)}30%{transform:translateX(8px) translateY(3px)}50%{transform:translateX(-6px) translateY(-2px)}70%{transform:translateX(6px) translateY(2px)}85%{transform:translateX(-3px)}}
+@keyframes sparkRing{0%{transform:translate(-50%,-50%) scale(0);opacity:1;border-width:4px}100%{transform:translate(-50%,-50%) scale(2.5);opacity:0;border-width:1px}}
+@keyframes chargeUp{0%,100%{filter:brightness(1)}50%{filter:brightness(2) saturate(2)}}
+.shaking{animation:bigSh .4s ease;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+<script type="text/babel">
+const{useState,useEffect,useRef}=React;
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+/* ── ATTACK DATA ── キャラごとに3種類のわざ (0,1=通常, 2=コンボ専用) */
+const CHAR_ATKS={
+  luna:[{n:'ムーンスラッシュ',e:'🌙',c:'#7c9fff',t:'三日月斬り！',sz:34},{n:'ダークウェーブ',e:'✦',c:'#5c6bc0',t:'ダークウェーブ！',sz:28},{n:'ルナクレセント',e:'⭐',c:'#e040fb',t:'スターライト！！',sz:42}],
+  hana:[{n:'サンダーキック',e:'⚡',c:'#ffd700',t:'稲妻キック！',sz:34},{n:'エレクトリック',e:'💫',c:'#ff9800',t:'エレクトリック！',sz:30},{n:'チェーンボルト',e:'⚡',c:'#ffeb3b',t:'チェーンボルト！！',sz:44}],
+  mira:[{n:'ファイアパンチ',e:'🔥',c:'#ff6b6b',t:'炎パンチ！',sz:34},{n:'ロックブレイク',e:'💥',c:'#ff5722',t:'ロック破裂！',sz:32},{n:'メテオクラッシュ',e:'☄️',c:'#ff9800',t:'メテオ落下！！',sz:46}],
+  rin:[{n:'スナイパーショット',e:'🎯',c:'#00e5ff',t:'精密射撃！',sz:32},{n:'レーザービーム',e:'→',c:'#00bcd4',t:'レーザー！',sz:36},{n:'マルチスナイプ',e:'⊕',c:'#80deea',t:'トリプルショット！！',sz:40}],
+  sora:[{n:'フラワーアタック',e:'🌸',c:'#ff80ab',t:'花びらアタック！',sz:34},{n:'スパークルダンス',e:'✨',c:'#ff4081',t:'スパークル！',sz:32},{n:'スターブラスト',e:'🌟',c:'#e040fb',t:'スターブラスト！！',sz:46}],
+};
+const ENEMY_ATKS={
+  0:[{n:'スライムボム',e:'💜',c:'#9c27b0',t:'どろっ！',sz:32},{n:'べっとり攻撃',e:'🟣',c:'#7b1fa2',t:'べっとり！',sz:28}],
+  1:[{n:'ゴーストタッチ',e:'👻',c:'#cfd8dc',t:'うらめしや〜！',sz:32},{n:'れいき攻撃',e:'❄️',c:'#90a4ae',t:'ひえ〜！',sz:28}],
+  2:[{n:'クモの巣',e:'🕸️',c:'#795548',t:'ネットアタック！',sz:30},{n:'毒液攻撃',e:'☠️',c:'#5d4037',t:'毒だ！',sz:28}],
+  3:[{n:'魔法の弾',e:'🌟',c:'#3f51b5',t:'魔法炸裂！',sz:32},{n:'呪いビーム',e:'✦',c:'#1a237e',t:'呪え〜！',sz:30}],
+  4:[{n:'ファイアブレス',e:'🔥',c:'#f44336',t:'炎のブレス！！！',sz:44},{n:'テールスマッシュ',e:'💥',c:'#b71c1c',t:'しっぽ攻撃！',sz:38}],
+};
+
+/* ── SAVE ── */
+const SK='starHuntersV6';
+function loadSave(){try{const d=JSON.parse(localStorage.getItem(SK)||'{}');return{ts:d.ts||0,cd:d.cd||[]};}catch{return{ts:0,cd:[]};}}
+function doSave(ts,cd){try{localStorage.setItem(SK,JSON.stringify({ts,cd}));}catch{}}
+
+/* ── TITLES ── */
+const TITLES=[
+  {stars:0,   title:'みならいハンター',    icon:'🌱',color:'#81c784',next:'10'},
+  {stars:10,  title:'スターハンター',      icon:'⭐',color:'#fff176',next:'30'},
+  {stars:30,  title:'シルバーハンター',    icon:'🥈',color:'#b0bec5',next:'60'},
+  {stars:60,  title:'ゴールドハンター',    icon:'🥇',color:'#ffd700',next:'100'},
+  {stars:100, title:'プラチナハンター',    icon:'💫',color:'#e1f5fe',next:'200'},
+  {stars:200, title:'ダイヤモンドハンター',icon:'💎',color:'#80deea',next:'500'},
+  {stars:500, title:'レジェンドハンター',  icon:'👑',color:'#ffb300',next:'1000'},
+  {stars:1000,title:'スターゴッデス',      icon:'✨',color:'#ff80ab',next:null},
+];
+function getTitle(ts){let t=TITLES[0];for(const x of TITLES){if(ts>=x.stars)t=x;else break;}return t;}
+function getNextTitle(ts){for(const x of TITLES)if(ts<x.stars)return x;return null;}
+
+/* ── DATA ── */
+const HC=[{c:'#12103e'},{c:'#8b1fd4'},{c:'#c41b1b'},{c:'#0d6efd'},{c:'#e8178a'},{c:'#008b8b'},{c:'#d4a017'}];
+const HN=['ブラック','パープル','レッド','ブルー','ピンク','ティール','ゴールド'];
+const HS=[{id:'bun',n:'おだんご'},{id:'twin',n:'ツインテ'},{id:'mohawk',n:'モヒカン'},{id:'long',n:'ロング'},{id:'bob',n:'ボブ'}];
+const OC=[{c:'#1565c0'},{c:'#f4a900'},{c:'#212121'},{c:'#e8178a'},{c:'#1b6b2f'},{c:'#6a0dad'},{c:'#d44000'}];
+const SC=[{c:'#1a1a1a'},{c:'#e0e0e0'},{c:'#b71c1c'},{c:'#1565c0'},{c:'#e8178a'}];
+const ACS=[{id:'none',n:'なし',e:'✕'},{id:'ear',n:'ピアス',e:'💎'},{id:'hat',n:'キャップ',e:'🧢'},{id:'chain',n:'チェーン',e:'📿'},{id:'glasses',n:'メガネ',e:'🕶'},{id:'bag',n:'バッグ',e:'👜'}];
+
+/* 5 characters — RIN unlocks at 20⭐, SORA at 60⭐ */
+const CHARS=[
+  {id:'luna',n:'ルナ',en:'LUNA',desc:'クールで神秘的',sp:'ルナビーム 🌙',dh:0,ds:0,do:0,ds2:0,da:0,ac:'#7c9fff',gl:'rgba(100,130,255,.5)',bg:['#0a0f2e','#0f1a4a'],unlock:0},
+  {id:'hana',n:'ハナ',en:'HANA',desc:'エネルギッシュなリーダー',sp:'ハナストーム ⚡',dh:1,ds:2,do:1,ds2:0,da:3,ac:'#c97fff',gl:'rgba(180,100,255,.5)',bg:['#1a0a35','#2d1260'],unlock:0},
+  {id:'mira',n:'ミラ',en:'MIRA',desc:'フィアースなロックスター',sp:'ミラバースト 🔥',dh:2,ds:3,do:2,ds2:2,da:4,ac:'#ff6b6b',gl:'rgba(255,80,80,.5)',bg:['#2a0808','#4a1010'],unlock:0},
+  {id:'rin', n:'リン',en:'RIN', desc:'クールな天才探偵',        sp:'リンスナイパー 🎯',dh:5,ds:4,do:0,ds2:0,da:4,ac:'#00e5ff',gl:'rgba(0,229,255,.4)',bg:['#002830','#00474a'],unlock:20},
+  {id:'sora',n:'ソラ',en:'SORA',desc:'ハッピーダンサー',        sp:'ソラブラスト 🌸',dh:4,ds:1,do:3,ds2:1,da:1,ac:'#ff80ab',gl:'rgba(255,128,171,.4)',bg:['#2a0020','#4a0035'],unlock:60},
+];
+
+const ENEMIES=[
+  {id:0,n:'ダークスライム',hp:3,c:'#9c27b0'},
+  {id:1,n:'ゴーストちゃん', hp:5,c:'#546e7a'},
+  {id:2,n:'クモのまじん',   hp:7,c:'#4e342e'},
+  {id:3,n:'ダークウィッチ', hp:10,c:'#1a237e'},
+  {id:4,n:'ドラゴンキング', hp:15,c:'#b71c1c'},
+];
+const DIFFS=[
+  {id:'easy',  n:'やさしい',   e:'🌟',desc:'１けたのたしざん',c:'#2e7d32',gl:'rgba(46,125,50,.5)'},
+  {id:'normal',n:'ふつう',     e:'⚡',desc:'たしざんとひきざん',c:'#1565c0',gl:'rgba(21,101,192,.5)'},
+  {id:'hard',  n:'むずかしい', e:'🔥',desc:'２けた・ひきざん・かけざん',c:'#b71c1c',gl:'rgba(183,28,28,.5)'},
+];
+const SEQ=[
+  {t:'story',k:'ch1'},{t:'battle',ei:0},{t:'story',k:'b0'},
+  {t:'battle',ei:1},{t:'story',k:'ch1e'},
+  {t:'story',k:'ch2'},{t:'battle',ei:2},{t:'story',k:'b2'},
+  {t:'battle',ei:3},{t:'story',k:'ch2e'},
+  {t:'story',k:'ch3'},{t:'battle',ei:4},{t:'story',k:'end'},
+];
+const STORIES={
+  ch1:{ch:1,title:'Chapter 1',sub:'ダークフォレストの呼び声',text:'スターハンターズに\n緊急連絡！\nまほうの森に闇のモンスターが\n現れた！\nみんなで力を合わせよう！',icon:'🌲',bg:['#071407','#0f2010'],btn:'出発！',type:'intro'},
+  b0: {title:'スライムをたおした！',text:'やったね！\nでも... 森の奥から\nまだ気配がする...\n次の敵が待っているよ！',icon:'👻',bg:['#081518','#101828'],btn:'つぎへ！',type:'mid'},
+  ch1e:{ch:1,title:'🎉 Chapter 1 クリア！',text:'まほうの森のモンスターを\nすべてたおした！\n古城への地図を\n手に入れた！',icon:'🗺️',bg:['#0a1a0a','#1a3010'],btn:'Chapter 2 へ！',type:'cend'},
+  ch2:{ch:2,title:'Chapter 2',sub:'ゴーストキャッスルの謎',text:'古城に到着！\nでも中は呪いにかかっている...\n魔女の力を感じる。\n気をつけて！',icon:'🏰',bg:['#080020','#1a0035'],btn:'行くぞ！',type:'intro'},
+  b2: {title:'クモのまじんをたおした！',text:'古城の罠を突破した！\nでも城の奥に...\n何か大きな力を感じる！',icon:'🧙',bg:['#100010','#200030'],btn:'つぎへ！',type:'mid'},
+  ch2e:{ch:2,title:'🎉 Chapter 2 クリア！',text:'魔女をたおした！\n呪いが解けていく...\nでも最強の敵が\nまだいる！',icon:'⚔️',bg:['#0a0020','#1a0a30'],btn:'Chapter 3 へ！',type:'cend'},
+  ch3:{ch:3,title:'Chapter 3',sub:'最終決戦！ドラゴンキング',text:'ついに来た...\n最強の敵、\nドラゴンキング！\nみんなの力を一つに！',icon:'🐲',bg:['#200000','#3a0000'],btn:'戦う！',type:'intro'},
+  end:{title:'🏆 おめでとう！',text:'ドラゴンキングをたおした！\nスターハンターズは\n世界を救った！\nきみは真のヒーローだ！',icon:'🌟',bg:['#1a1000','#0a1020'],btn:'もう一度あそぶ！',type:'end'},
+};
+const STARS=Array.from({length:22},()=>({x:rnd(2,96),y:rnd(2,96),s:Math.random()<.3?3:2,d:1.5+Math.random()*2,dl:Math.random()*2}));
+
+function genProb(diff,ei){
+  let a,b,op,ans;
+  if(diff==='easy'){const mx=Math.min(3+ei,7);a=rnd(1,mx);b=rnd(1,mx);op='+';ans=a+b;}
+  else if(diff==='normal'){
+    if(ei<2){a=rnd(1,9);b=rnd(1,9);op='+';ans=a+b;}
+    else if(Math.random()<.5){a=rnd(1,9);b=rnd(1,9);op='+';ans=a+b;}
+    else{b=rnd(1,8);a=b+rnd(1,9);op='−';ans=a-b;}
+  }else{
+    if(ei<2){a=rnd(11,25);b=rnd(11,22);op='+';ans=a+b;}
+    else if(ei<4){if(Math.random()<.45){a=rnd(11,25);b=rnd(11,22);op='+';ans=a+b;}else{b=rnd(5,14);a=b+rnd(5,20);op='−';ans=a-b;}}
+    else{if(Math.random()<.6){a=rnd(2,6);b=rnd(2,6);op='×';ans=a*b;}else{b=rnd(5,14);a=b+rnd(5,20);op='−';ans=a-b;}}
+  }
+  return{a,b,op,ans};
+}
+function makeChoices(ans){
+  const s=new Set([ans]);
+  for(let i=0;s.size<4&&i<80;i++){const d=rnd(1,8),c=Math.random()>.5?ans+d:Math.max(0,ans-d);if(c!==ans&&c>=0)s.add(c);}
+  for(let i=ans+1;s.size<4;i++)s.add(i);
+  return[...s].sort(()=>Math.random()-.5);
+}
+
+/* ── CHIBI CHARACTER ── */
+function ChibiChar({cid,hci,hsi,oci,schi,acci,size=110,anim}){
+  const hc=HC[hci]?.c||'#12103e',oc=OC[oci]?.c||'#1565c0',sc=SC[schi]?.c||'#1a1a1a';
+  const aid=ACS[acci]?.id||'none',hid=HS[hsi]?.id||'bun';
+  const char=CHARS.find(c=>c.id===cid),eye=char?.ac||'#7c9fff';
+  const cls=anim==='attack'?'apAtk':anim==='attackE'?'aeAtk':anim==='hurt'?'ahurt':anim==='victory'?'avic':anim==='idle'?'aidle':'';
+  const HB={
+    bun:<g><ellipse cx="60" cy="44" rx="27" ry="20" fill={hc}/><circle cx="60" cy="24" r="14" fill={hc}/></g>,
+    twin:<g><ellipse cx="60" cy="44" rx="25" ry="19" fill={hc}/><ellipse cx="16" cy="82" rx="13" ry="26" fill={hc}/><ellipse cx="104" cy="82" rx="13" ry="26" fill={hc}/></g>,
+    mohawk:<g><ellipse cx="60" cy="45" rx="25" ry="19" fill={hc}/><rect x="53" y="8" width="14" height="40" rx="7" fill={hc}/></g>,
+    long:<g><ellipse cx="60" cy="44" rx="28" ry="20" fill={hc}/><rect x="18" y="60" width="20" height="68" rx="10" fill={hc}/><rect x="82" y="60" width="20" height="68" rx="10" fill={hc}/></g>,
+    bob:<g><ellipse cx="60" cy="44" rx="28" ry="20" fill={hc}/><rect x="22" y="57" width="76" height="22" rx="7" fill={hc}/></g>,
+  };
+  /* Hair front MAX y=51, eyes start at y=54.5 → face always visible */
+  const HF={bun:<ellipse cx="60" cy="42" rx="20" ry="9" fill={hc}/>,twin:<ellipse cx="60" cy="42" rx="20" ry="9" fill={hc}/>,mohawk:null,long:<ellipse cx="60" cy="42" rx="22" ry="9" fill={hc}/>,bob:<rect x="28" y="37" width="64" height="14" rx="5" fill={hc}/>};
+  const AM={
+    none:null,
+    ear:<g><circle cx="30" cy="70" r="4" fill="#ffd700"/><circle cx="90" cy="70" r="4" fill="#ffd700"/><circle cx="30" cy="70" r="2" fill="rgba(255,255,255,.6)"/><circle cx="90" cy="70" r="2" fill="rgba(255,255,255,.6)"/></g>,
+    hat:<g><ellipse cx="60" cy="51" rx="32" ry="8" fill="#1e1e30"/><ellipse cx="60" cy="43" rx="22" ry="14" fill="#2a2a42"/><ellipse cx="60" cy="40" rx="8" ry="5" fill="#3a3a5a"/></g>,
+    chain:<path d="M44 100 Q60 107 76 100" stroke="#ffd700" strokeWidth="3" fill="none" strokeLinecap="round"/>,
+    glasses:<g><rect x="31" y="62" width="18" height="12" rx="5" fill="none" stroke="#ffd700" strokeWidth="2.5"/><rect x="52" y="62" width="18" height="12" rx="5" fill="none" stroke="#ffd700" strokeWidth="2.5"/><line x1="49" y1="68" x2="52" y2="68" stroke="#ffd700" strokeWidth="2.5"/></g>,
+    bag:<g><rect x="7" y="107" width="19" height="24" rx="6" fill={oc} opacity=".85"/><path d="M10 107 Q16.5 99 23 107" stroke={oc} strokeWidth="2.5" fill="none"/></g>,
+  };
+  return(
+    <div className={cls} style={{display:'inline-block'}}>
+      <svg width={size} height={size*1.35} viewBox="0 0 120 162" xmlns="http://www.w3.org/2000/svg">
+        {HB[hid]}
+        <ellipse cx="60" cy="65" rx="30" ry="28" fill="#ffd5b0"/>
+        <ellipse cx="54" cy="57" rx="12" ry="8" fill="white" opacity=".1"/>
+        <ellipse cx="46" cy="63" rx="7" ry="8.5" fill="#1a0a30"/>
+        <ellipse cx="44" cy="59" rx="4" ry="3.5" fill="white"/>
+        <circle cx="43" cy="58" r="1.5" fill="white"/>
+        <ellipse cx="47" cy="64" rx="4" ry="5" fill={eye} opacity=".65"/>
+        <ellipse cx="74" cy="63" rx="7" ry="8.5" fill="#1a0a30"/>
+        <ellipse cx="72" cy="59" rx="4" ry="3.5" fill="white"/>
+        <circle cx="71" cy="58" r="1.5" fill="white"/>
+        <ellipse cx="75" cy="64" rx="4" ry="5" fill={eye} opacity=".65"/>
+        <path d="M38 52 Q46 48 54 52" stroke="#1a0a20" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+        <path d="M66 52 Q74 48 82 52" stroke="#1a0a20" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+        <ellipse cx="34" cy="72" rx="9" ry="6" fill="#ffb3c6" opacity=".45"/>
+        <ellipse cx="86" cy="72" rx="9" ry="6" fill="#ffb3c6" opacity=".45"/>
+        <path d="M50 78 Q60 86 70 78" stroke="#e8178a" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+        {HF[hid]}
+        <rect x="54" y="90" width="12" height="10" fill="#ffd5b0"/>
+        <rect x="22" y="98" width="17" height="33" rx="8.5" fill={oc}/>
+        <rect x="81" y="98" width="17" height="33" rx="8.5" fill={oc}/>
+        <circle cx="30.5" cy="134" r="7.5" fill="#ffd5b0"/>
+        <circle cx="89.5" cy="134" r="7.5" fill="#ffd5b0"/>
+        <rect x="34" y="93" width="52" height="49" rx="14" fill={oc}/>
+        <rect x="34" y="131" width="52" height="7" rx="3.5" fill="rgba(0,0,0,.2)"/>
+        <ellipse cx="60" cy="108" rx="8" ry="4" fill="rgba(255,255,255,.12)"/>
+        <rect x="38" y="135" width="18" height="24" rx="5" fill="#1e1a3a"/>
+        <rect x="64" y="135" width="18" height="24" rx="5" fill="#1e1a3a"/>
+        <rect x="33" y="151" width="26" height="12" rx="6" fill={sc}/>
+        <rect x="61" y="151" width="26" height="12" rx="6" fill={sc}/>
+        <ellipse cx="43" cy="155" rx="9" ry="3" fill="white" opacity=".15"/>
+        <ellipse cx="71" cy="155" rx="9" ry="3" fill="white" opacity=".15"/>
+        {AM[aid]}
+      </svg>
+    </div>
+  );
+}
+
+/* Enemy SVG */
+function EnemySVG({eid,sz=100}){
+  const D=[
+    <svg key="sl" width={sz} height={sz} viewBox="0 0 100 100"><ellipse cx="50" cy="68" rx="38" ry="26" fill="#6a1b9a" opacity=".7"/><ellipse cx="50" cy="50" rx="34" ry="36" fill="#9c27b0"/><ellipse cx="50" cy="44" rx="26" ry="26" fill="#ce93d8"/><ellipse cx="50" cy="38" rx="18" ry="13" fill="white" opacity=".12"/><ellipse cx="38" cy="44" rx="7" ry="8" fill="#1a0a30"/><circle cx="40" cy="41" r="3" fill="white"/><ellipse cx="62" cy="44" rx="7" ry="8" fill="#1a0a30"/><circle cx="64" cy="41" r="3" fill="white"/><path d="M40 58 Q50 65 60 58" stroke="#4a1275" strokeWidth="2.5" fill="none"/></svg>,
+    <svg key="gh" width={sz} height={sz*1.1} viewBox="0 0 100 110"><ellipse cx="50" cy="44" rx="32" ry="34" fill="#e8eaf6" opacity=".92"/><rect x="18" y="44" width="64" height="42" fill="#e8eaf6" opacity=".92"/><path d="M18 86 Q27 98 36 86 Q45 74 54 86 Q63 98 72 86 Q81 74 82 86" fill="#e8eaf6" opacity=".92"/><ellipse cx="38" cy="43" rx="8" ry="9" fill="#455a64"/><circle cx="40" cy="40" r="3" fill="white"/><ellipse cx="62" cy="43" rx="8" ry="9" fill="#455a64"/><circle cx="64" cy="40" r="3" fill="white"/><path d="M40 60 Q50 67 60 60" stroke="#455a64" strokeWidth="3" fill="none"/></svg>,
+    <svg key="sp" width={sz*1.1} height={sz} viewBox="0 0 110 100"><line x1="22" y1="52" x2="2" y2="30" stroke="#4e342e" strokeWidth="4.5" strokeLinecap="round"/><line x1="22" y1="58" x2="0" y2="58" stroke="#4e342e" strokeWidth="4.5" strokeLinecap="round"/><line x1="22" y1="65" x2="5" y2="85" stroke="#4e342e" strokeWidth="4.5" strokeLinecap="round"/><line x1="88" y1="52" x2="108" y2="30" stroke="#4e342e" strokeWidth="4.5" strokeLinecap="round"/><line x1="88" y1="58" x2="110" y2="58" stroke="#4e342e" strokeWidth="4.5" strokeLinecap="round"/><line x1="88" y1="65" x2="105" y2="85" stroke="#4e342e" strokeWidth="4.5" strokeLinecap="round"/><ellipse cx="55" cy="55" rx="33" ry="30" fill="#3e2723"/><ellipse cx="55" cy="49" rx="26" ry="23" fill="#5d4037"/>{[28,40,55,68,80].map((x,i)=><circle key={i} cx={x} cy={i===2?43:46} r={i===2?4:5} fill="#f44336"/>)}<path d="M40 65 Q55 74 70 65" stroke="#1a0a00" strokeWidth="2.5" fill="none"/><line x1="46" y1="68" x2="44" y2="76" stroke="white" strokeWidth="2"/><line x1="64" y1="68" x2="66" y2="76" stroke="white" strokeWidth="2"/></svg>,
+    <svg key="wt" width={sz} height={sz*1.2} viewBox="0 0 100 120"><polygon points="50,4 18,42 82,42" fill="#1a237e"/><rect x="10" y="40" width="80" height="10" rx="5" fill="#283593"/><ellipse cx="50" cy="42" rx="5" ry="3.5" fill="#ffeb3b" opacity=".9"/><ellipse cx="50" cy="66" rx="28" ry="26" fill="#c8e6c9"/><ellipse cx="39" cy="62" rx="6.5" ry="7.5" fill="#1a237e"/><circle cx="40" cy="59" r="2.5" fill="white"/><ellipse cx="61" cy="62" rx="6.5" ry="7.5" fill="#1a237e"/><circle cx="62" cy="59" r="2.5" fill="white"/><path d="M37 84 Q50 92 63 84" stroke="#1a237e" strokeWidth="3" fill="none"/><path d="M25 92 L32 92 L38 120 L62 120 L68 92 L75 92 Q72 96 60 102 L40 102 Q28 96 25 92Z" fill="#1a237e"/><line x1="76" y1="78" x2="95" y2="56" stroke="#795548" strokeWidth="3.5" strokeLinecap="round"/><circle cx="96" cy="54" r="6" fill="#ffeb3b"/></svg>,
+    <svg key="dr" width={sz*1.1} height={sz*1.1} viewBox="0 0 110 120"><path d="M22 52 L-2 22 L18 42 L6 10 L32 48Z" fill="#b71c1c" opacity=".9"/><path d="M88 52 L112 22 L92 42 L104 10 L78 48Z" fill="#b71c1c" opacity=".9"/><ellipse cx="55" cy="78" rx="28" ry="32" fill="#c62828"/><ellipse cx="55" cy="82" rx="18" ry="24" fill="#ef9a9a" opacity=".55"/><ellipse cx="55" cy="46" rx="29" ry="26" fill="#d32f2f"/><polygon points="38,23 30,4 48,20" fill="#b71c1c"/><polygon points="72,23 80,4 62,20" fill="#b71c1c"/><ellipse cx="43" cy="43" rx="8" ry="9" fill="#1a0a00"/><circle cx="44" cy="40" r="3.5" fill="#ff5722"/><circle cx="45" cy="39" r="1.8" fill="white"/><ellipse cx="67" cy="43" rx="8" ry="9" fill="#1a0a00"/><circle cx="68" cy="40" r="3.5" fill="#ff5722"/><circle cx="69" cy="39" r="1.8" fill="white"/><circle cx="50" cy="55" r="3" fill="#b71c1c"/><circle cx="60" cy="55" r="3" fill="#b71c1c"/><path d="M37 63 Q55 76 73 63" fill="#1a0a00"/>{[44,52,60,68].map((x,i)=><line key={i} x1={x} y1="67" x2={x+(i%2===0?-2:2)} y2="75" stroke="white" strokeWidth="2.5"/>)}<rect x="34" y="17" width="42" height="11" rx="3" fill="#ffd700"/>{[34,52,70].map((x,i)=><polygon key={i} points={`${x},17 ${x+6},5 ${x+12},17`} fill="#ffd700"/>)}<circle cx="58" cy="11" r="3.5" fill="#f44336"/></svg>,
+  ];
+  return D[eid]||D[0];
+}
+
+/* ── ROADMAP SCREEN ── */
+function RoadmapScreen({totalStars,completedDiffs,onClose}){
+  const curTitle=getTitle(totalStars);
+  const WORLDS=[
+    {id:'easy',name:'まほうの森',sub:'世界の始まり',diff:'やさしい',icon:'🌲',c:'#2e7d32',gl:'rgba(46,125,50,.6)',
+     story:'世界中に闇の力が広がり始めた！\nまずはまほうの森のモンスターをたおして\n森の平和を守ろう！',
+     enemies:['🟣 ダークスライム','👻 ゴーストちゃん'],math:'１けたのたしざん',bg:['#071407','#0f2010']},
+    {id:'normal',name:'ゴーストキャッスル',sub:'呪いを解け',diff:'ふつう',icon:'🏰',c:'#1565c0',gl:'rgba(21,101,192,.6)',
+     story:'森を守った！次は古城の呪いを解こう！\nクモとダークウィッチが待ち受けている...\n仲間と力を合わせて立ち向かえ！',
+     enemies:['🕷️ クモのまじん','🧙 ダークウィッチ'],math:'たしざん＋ひきざん',bg:['#080020','#1a0035']},
+    {id:'hard',name:'ドラゴンキング最終決戦',sub:'世界平和をかけた戦い',diff:'むずかしい',icon:'🐲',c:'#b71c1c',gl:'rgba(183,28,28,.6)',
+     story:'ついに最終決戦！\n最強の敵ドラゴンキングを倒して\n世界に平和をとりもどせ！\nスターハンターズの力を見せろ！',
+     enemies:['🐲 ドラゴンキング（ボス）'],math:'２けた＋ひきざん＋かけざん',bg:['#200000','#3a0000']},
+  ];
+  const allDone=completedDiffs.includes('hard');
+  return(
+    <div style={{background:'linear-gradient(180deg,#0a0020,#1a0035)',minHeight:680,display:'flex',flexDirection:'column',position:'relative'}}>
+      {/* Header */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 20px 0',flexShrink:0}}>
+        <button onClick={onClose} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 15px',color:'white',fontWeight:800,fontSize:13}}>← もどる</button>
+        <div style={{color:'#ce93d8',fontWeight:900,fontSize:14,letterSpacing:1}}>🗺️ ロードマップ</div>
+        <div style={{width:70}}/>
+      </div>
+      {/* Title */}
+      <div style={{textAlign:'center',padding:'10px 20px 6px',flexShrink:0}}>
+        <div style={{fontSize:22,fontWeight:900,color:'white',textShadow:'0 0 20px rgba(255,255,255,.3)'}}>🌍 世界平和への道</div>
+        <div style={{fontSize:11,color:'#9575cd',marginTop:2,fontWeight:700}}>スターハンターズの冒険ロードマップ</div>
+        <div style={{display:'inline-flex',gap:6,alignItems:'center',background:'rgba(255,255,255,.06)',borderRadius:12,padding:'5px 12px',marginTop:8,border:'1px solid rgba(255,255,255,.1)'}}>
+          <span style={{fontSize:18}}>{curTitle.icon}</span>
+          <span style={{color:curTitle.color,fontWeight:800,fontSize:12}}>{curTitle.title}</span>
+          <span style={{color:'rgba(255,255,255,.4)',fontSize:11}}>⭐ {totalStars}</span>
+        </div>
+      </div>
+      {/* Scrollable content */}
+      <div style={{flex:1,overflowY:'auto',padding:'8px 16px 20px'}}>
+        {/* World stages */}
+        {WORLDS.map((w,i)=>{
+          const done=completedDiffs.includes(w.id);
+          return(
+            <div key={w.id}>
+              <div style={{background:`linear-gradient(135deg,${w.bg[0]},${w.bg[1]})`,border:`2px solid ${done?'#4caf50':w.c}66`,borderRadius:20,padding:'14px 16px',position:'relative',marginBottom:4}}>
+                {done&&<div style={{position:'absolute',top:10,right:12,fontSize:22}}>✅</div>}
+                {/* World header */}
+                <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:8}}>
+                  <div style={{fontSize:38,filter:`drop-shadow(0 0 10px ${w.c})`}}>{w.icon}</div>
+                  <div>
+                    <div style={{color:w.c,fontSize:9,fontWeight:900,letterSpacing:3,marginBottom:2}}>{w.diff.toUpperCase()}</div>
+                    <div style={{color:'white',fontSize:16,fontWeight:900,lineHeight:1.2}}>{w.name}</div>
+                    <div style={{color:'rgba(255,255,255,.45)',fontSize:10,marginTop:1}}>{w.sub}</div>
+                  </div>
+                </div>
+                {/* Story */}
+                <div style={{background:'rgba(0,0,0,.25)',borderRadius:10,padding:'8px 12px',marginBottom:8,border:'1px solid rgba(255,255,255,.06)'}}>
+                  <div style={{color:'rgba(255,255,255,.75)',fontSize:12,lineHeight:1.8,whiteSpace:'pre-line'}}>{w.story}</div>
+                </div>
+                {/* Enemies */}
+                <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:6}}>
+                  {w.enemies.map((e,j)=><div key={j} style={{background:'rgba(255,255,255,.08)',borderRadius:8,padding:'3px 8px',fontSize:11,color:'rgba(255,255,255,.65)',border:'1px solid rgba(255,255,255,.08)'}}>{e}</div>)}
+                </div>
+                {/* Math */}
+                <div style={{background:w.c+'22',borderRadius:8,padding:'3px 10px',display:'inline-block',border:`1px solid ${w.c}44`}}>
+                  <span style={{color:w.c,fontSize:11,fontWeight:800}}>📐 {w.math}</span>
+                </div>
+              </div>
+              {/* Connector arrow */}
+              {i<WORLDS.length-1&&<div style={{textAlign:'center',fontSize:16,padding:'4px 0',color:'rgba(255,255,255,.2)'}}>⬇</div>}
+            </div>
+          );
+        })}
+        {/* World Peace Goal */}
+        <div style={{marginTop:8,background:allDone?'linear-gradient(135deg,rgba(255,215,0,.12),rgba(76,175,80,.12))':'rgba(255,255,255,.04)',border:`2px solid ${allDone?'#ffd700':'rgba(255,255,255,.1)'}`,borderRadius:20,padding:'18px',textAlign:'center'}}>
+          <div style={{fontSize:allDone?56:44,marginBottom:8}}>{allDone?'🕊️✨':'🕊️'}</div>
+          <div style={{color:allDone?'#ffd700':'rgba(255,255,255,.6)',fontSize:20,fontWeight:900,marginBottom:6}}>{allDone?'🌍 世界平和 達成！':'🌍 世界平和'}</div>
+          <div style={{color:'rgba(255,255,255,.5)',fontSize:12,lineHeight:1.8}}>{allDone?'すべてのモンスターをたおして\n世界に平和をとりもどした！\nスターハンターズのヒーローだ！':'むずかしいモードをクリアして\n世界中に平和をとりもどそう！\nスターハンターズの力を見せろ！'}</div>
+        </div>
+        {/* Title roadmap */}
+        <div style={{marginTop:12,background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:20,padding:'14px 16px'}}>
+          <div style={{color:'white',fontWeight:900,fontSize:13,marginBottom:10}}>🏅 称号ロードマップ</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+            {TITLES.map((t,i)=>{
+              const got=totalStars>=t.stars;
+              return(
+                <div key={i} style={{display:'flex',alignItems:'center',gap:6,background:got?'rgba(255,255,255,.07)':'rgba(255,255,255,.02)',borderRadius:10,padding:'6px 8px',border:got?`1px solid ${t.color}33`:'1px solid rgba(255,255,255,.04)',opacity:got?1:.5}}>
+                  <span style={{fontSize:18}}>{t.icon}</span>
+                  <div>
+                    <div style={{color:got?t.color:'rgba(255,255,255,.4)',fontWeight:800,fontSize:10,lineHeight:1.2}}>{t.title}</div>
+                    <div style={{color:'rgba(255,255,255,.3)',fontSize:9}}>⭐ {t.stars}〜</div>
+                  </div>
+                  {got&&<span style={{fontSize:12,marginLeft:'auto'}}>✓</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── TITLE OVERLAY ── */
+function TitleOverlay({data,onClose}){
+  useEffect(()=>{const t=setTimeout(onClose,3500);return()=>clearTimeout(t);},[]);
+  return(
+    <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.75)',animation:'fadeIn .3s ease'}}>
+      <div className="atpop" style={{background:'linear-gradient(135deg,#1a0040,#2a0060)',border:`2px solid ${data.color}55`,borderRadius:28,padding:'32px 44px',textAlign:'center',boxShadow:`0 0 50px ${data.color}44,0 20px 40px rgba(0,0,0,.6)`,maxWidth:300}}>
+        <div style={{fontSize:12,letterSpacing:4,color:'rgba(255,255,255,.5)',marginBottom:10,fontWeight:800}}>🎊 称号ゲット！</div>
+        <div style={{fontSize:68,marginBottom:12,filter:`drop-shadow(0 0 20px ${data.color})`}}>{data.icon}</div>
+        <div style={{fontSize:24,fontWeight:900,color:data.color,marginBottom:8,textShadow:`0 0 20px ${data.color}`}}>{data.title}</div>
+        <div style={{fontSize:12,color:'rgba(255,255,255,.4)'}}>タップして閉じる</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── MAIN APP ── */
+function App(){
+  const saved=loadSave();
+  const[scr,setScr]=useState('title');
+  const[diff,setDiff]=useState(null);
+  const[cid,setCid]=useState(null);
+  const[cu,setCu]=useState({hc:0,hs:0,oc:0,sc:0,ac:0});
+  const[tab,setTab]=useState('hair');
+  const[seqIdx,setSeqIdx]=useState(0);
+  const[story,setStory]=useState(null);
+  const[eidx,setEidx]=useState(0);
+  const[ehp,setEhp]=useState(0);
+  const[php,setPhp]=useState(3);
+  const[streak,setStreak]=useState(0);
+  const[stars,setStars]=useState(0);
+  const[totalStars,setTotalStars]=useState(saved.ts);
+  const[completedDiffs,setCompletedDiffs]=useState(saved.cd);
+  const[prob,setProb]=useState(null);
+  const[chs,setChs]=useState([]);
+  const[wrong,setWrong]=useState(false);
+  const[wkey,setWkey]=useState(0);
+  const[panim,setPanim]=useState(null);
+  const[eanim,setEanim]=useState(null);
+  const[bmsg,setBmsg]=useState('');
+  const[qn,setQn]=useState(0);
+  const[titleOverlay,setTitleOverlay]=useState(null);
+  const[showRoadmap,setShowRoadmap]=useState(false);
+  const[showCostume,setShowCostume]=useState(false);
+  const[cosTab,setCosTab]=useState('hair');
+  /* v5: attack effects */
+  const[efx,setEfx]=useState([]);
+  const[isSh,setIsSh]=useState(false);
+  const eid=useRef(0);
+  function addEfx(type,props,dur){const id=eid.current++;setEfx(p=>[...p,{id,type,...props}]);setTimeout(()=>setEfx(p=>p.filter(e=>e.id!==id)),dur);}
+
+  const char=CHARS.find(c=>c.id===cid);
+  const enemy=ENEMIES[eidx];
+
+  /* Add stars + check title upgrade */
+  function addStars(amt,curTotal){
+    const nt=curTotal+amt;
+    const oldT=getTitle(curTotal),newT=getTitle(nt);
+    setTotalStars(nt);setStars(s=>s+amt);
+    if(newT.title!==oldT.title)setTitleOverlay(newT);
+    return nt;
+  }
+
+  function pickChar(id){
+    const c=CHARS.find(x=>x.id===id);
+    setCid(id);setCu({hc:c.dh,hs:c.ds,oc:c.do,sc:c.ds2,ac:c.da});
+    setScr('customize');
+  }
+
+  function execStep(idx){
+    const s=SEQ[idx];
+    if(s.t==='story'){setStory(STORIES[s.k]);setScr('story');}
+    else{
+      const e=ENEMIES[s.ei];setEidx(s.ei);setEhp(e.hp);setPhp(3);setStreak(0);
+      setWrong(false);setBmsg('');
+      const p=genProb(diff,s.ei);setProb(p);setChs(makeChoices(p.ans));setQn(1);
+      setScr('battle');
+    }
+  }
+
+  function advance(si){const nx=si+1;setSeqIdx(nx);execStep(nx);}
+
+  function startAdventure(){
+    setStars(0);setSeqIdx(0);execStep(0);
+  }
+
+  function storyNext(){
+    if(story.type==='end'){
+      // Save completed difficulty
+      const nd=completedDiffs.includes(diff)?completedDiffs:[...completedDiffs,diff];
+      setCompletedDiffs(nd);doSave(totalStars,nd);
+      setScr('title');return;
+    }
+    advance(seqIdx);
+  }
+
+  function doAnswer(v){
+    if(!prob)return;
+    if(v===prob.ans){
+      const ns=streak+1;setStreak(ns);
+      const dmg=ns>=3?3:ns>=2?2:1;
+      const neh=Math.max(0,ehp-dmg);
+      const isCombo=ns>=2;
+      /* ── わざを選ぶ（コンボ時は第3わざ、それ以外はランダム0-1） ── */
+      const pool=CHAR_ATKS[cid]||CHAR_ATKS.luna;
+      const atk=pool[isCombo?2:rnd(0,1)];
+      /* ── キャラアニメ ── */
+      setPanim('attack');
+      setTimeout(()=>setEanim('hurt'),380);
+      setTimeout(()=>{setPanim(null);setEanim(null);},780);
+      /* ── 攻撃エフェクト sequence ── */
+      // 1) 発動ラベル
+      addEfx('label',{n:atk.n,t:atk.t,c:atk.c},1100);
+      // 2) 弾が飛ぶ
+      addEfx('proj',{em:atk.e,c:atk.c,sz:atk.sz,fp:true},520);
+      // 3) ヒット時バースト + ダメージ数字
+      setTimeout(()=>{
+        addEfx('burst',{c:atk.c,x:'71%',big:isCombo},620);
+        addEfx('ring',{c:atk.c,x:'71%'},700);
+        addEfx('dmg',{val:dmg,c:isCombo?'#ffb300':'#69f0ae',x:'71%',big:isCombo},1150);
+      },390);
+      // 4) コンボ時はスクリーンシェイク
+      if(isCombo){setTimeout(()=>{setIsSh(true);setTimeout(()=>setIsSh(false),420);},390);}
+      /* ── ゲーム状態更新 ── */
+      setEhp(neh);
+      const newTS=addStars(dmg,totalStars);
+      const msg=ns>=3?'🔥 クリティカル！×3！':ns>=2?'✨ コンボ！×2！':'💥 ヒット！';
+      setBmsg(msg);
+      if(neh<=0){
+        doSave(newTS,completedDiffs);
+        setPanim('victory');
+        setTimeout(()=>advance(seqIdx),1050);
+      }else{
+        setTimeout(()=>{const p=genProb(diff,eidx);setProb(p);setChs(makeChoices(p.ans));setWrong(false);setQn(q=>q+1);},920);
+      }
+    }else{
+      setStreak(0);setWrong(true);setWkey(k=>k+1);
+      const np=php-1;setPhp(np);
+      /* ── 敵のわざを選ぶ ── */
+      const ePool=ENEMY_ATKS[enemy.id]||ENEMY_ATKS[0];
+      const eatk=ePool[rnd(0,ePool.length-1)];
+      /* ── 敵アニメ ── */
+      setEanim('attack');
+      setTimeout(()=>setPanim('hurt'),380);
+      setTimeout(()=>{setEanim(null);setPanim(null);},780);
+      /* ── 敵攻撃エフェクト ── */
+      addEfx('label',{n:eatk.n,t:eatk.t,c:eatk.c,isEnemy:true},1100);
+      addEfx('proj',{em:eatk.e,c:eatk.c,sz:eatk.sz,fp:false},520);
+      setTimeout(()=>{
+        addEfx('burst',{c:'#f44336',x:'22%',big:false},620);
+        addEfx('ring',{c:'#f44336',x:'22%'},700);
+        addEfx('dmg',{val:1,c:'#ff5252',x:'18%',big:false},1150);
+        setIsSh(true);setTimeout(()=>setIsSh(false),420);
+      },390);
+      setBmsg('❌ まちがい！'+enemy.n+'のこうげき！');
+      if(np<=0)setTimeout(()=>setScr('defeat'),920);
+    }
+  }
+
+  function retryBattle(){
+    const s=SEQ[seqIdx];const e=ENEMIES[s.ei];
+    setEhp(e.hp);setPhp(3);setStreak(0);setWrong(false);setBmsg('');
+    const p=genProb(diff,s.ei);setProb(p);setChs(makeChoices(p.ans));setQn(1);
+    setScr('battle');
+  }
+
+  const curTitle=getTitle(totalStars);
+  const nextTitle=getNextTitle(totalStars);
+  const titleProg=nextTitle?Math.min((totalStars-curTitle.stars)/(nextTitle.stars-curTitle.stars)*100,100):100;
+
+  /* ══ ROADMAP ══ */
+  if(showRoadmap)return <RoadmapScreen totalStars={totalStars} completedDiffs={completedDiffs} onClose={()=>setShowRoadmap(false)}/>;
+
+  /* ══ TITLE SCREEN ══ */
+  if(scr==='title')return(
+    <div style={{background:'linear-gradient(160deg,#0a0020 0%,#1a0035 50%,#0d0015 100%)',minHeight:680,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:20,position:'relative',overflow:'hidden'}}>
+      {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
+      {STARS.map((s,i)=><div key={i} style={{position:'absolute',width:s.s,height:s.s,background:'white',borderRadius:'50%',left:s.x+'%',top:s.y+'%',opacity:.15,animation:`twinkle ${s.d}s ease-in-out infinite`,animationDelay:s.dl+'s'}}/>)}
+      <div style={{position:'absolute',top:'20%',left:'50%',transform:'translate(-50%,-50%)',width:280,height:280,background:'radial-gradient(circle,rgba(200,0,255,.15) 0%,transparent 70%)',borderRadius:'50%',pointerEvents:'none'}}/>
+
+      {/* Profile card */}
+      <div style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:18,padding:'12px 18px',marginBottom:14,zIndex:2,width:'100%',maxWidth:310}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+          <span style={{fontSize:26}}>{curTitle.icon}</span>
+          <div style={{flex:1}}>
+            <div style={{color:curTitle.color,fontWeight:900,fontSize:15,textShadow:`0 0 10px ${curTitle.color}55`}}>{curTitle.title}</div>
+            <div style={{color:'rgba(255,255,255,.45)',fontSize:11}}>⭐ {totalStars} スター</div>
+          </div>
+          <button onClick={()=>setShowRoadmap(true)} style={{background:'rgba(255,255,255,.1)',border:'1px solid rgba(255,255,255,.2)',borderRadius:10,padding:'6px 10px',color:'white',fontWeight:800,fontSize:11}}>🗺️ MAP</button>
+        </div>
+        {nextTitle&&<div>
+          <div style={{background:'rgba(255,255,255,.1)',borderRadius:6,height:7,overflow:'hidden',marginBottom:3}}>
+            <div style={{height:'100%',background:`linear-gradient(90deg,${curTitle.color},${nextTitle.color})`,width:titleProg+'%',borderRadius:6,transition:'width .5s ease'}}/>
+          </div>
+          <div style={{color:'rgba(255,255,255,.3)',fontSize:10}}>{nextTitle.icon} {nextTitle.title} まで あと {nextTitle.stars-totalStars}⭐</div>
+        </div>}
+        {!nextTitle&&<div style={{color:'#ff80ab',fontSize:11,fontWeight:800}}>✨ 最高称号達成！</div>}
+      </div>
+
+      <div style={{textAlign:'center',marginBottom:18,zIndex:2}}>
+        <div style={{fontSize:12,letterSpacing:6,color:'#ce93d8',fontWeight:900,marginBottom:6}}>✧ K-POP ✧</div>
+        <div style={{fontSize:44,fontWeight:900,background:'linear-gradient(135deg,#e040fb,#7c4dff,#40c4ff)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',letterSpacing:3,lineHeight:1}}>STAR</div>
+        <div style={{fontSize:44,fontWeight:900,background:'linear-gradient(135deg,#ff4081,#ff6d00)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',letterSpacing:5,lineHeight:1.1,marginBottom:8}}>HUNTERS</div>
+      </div>
+
+      <div style={{display:'flex',gap:6,marginBottom:20,zIndex:2}}>
+        {CHARS.slice(0,3).map((c,i)=>(
+          <div key={c.id} className="af" style={{textAlign:'center',animationDelay:`${i*.4}s`}}>
+            <div style={{filter:`drop-shadow(0 0 10px ${c.ac})`}}>
+              <ChibiChar cid={c.id} hci={c.dh} hsi={c.ds} oci={c.do} schi={c.ds2} acci={c.da} size={72}/>
+            </div>
+            <div style={{color:c.ac,fontSize:9,fontWeight:900,letterSpacing:1,marginTop:2}}>{c.en}</div>
+          </div>
+        ))}
+        {CHARS.slice(3).map((c,i)=>{
+          const unlocked=totalStars>=c.unlock;
+          return(
+            <div key={c.id} className={unlocked?'af':''} style={{textAlign:'center',animationDelay:`${(i+3)*.4}s`,position:'relative'}}>
+              <div style={{filter:unlocked?`drop-shadow(0 0 10px ${c.ac})`:'grayscale(1)',opacity:unlocked?1:.4}}>
+                <ChibiChar cid={c.id} hci={c.dh} hsi={c.ds} oci={c.do} schi={c.ds2} acci={c.da} size={72}/>
+              </div>
+              {!unlocked&&<div style={{position:'absolute',top:'40%',left:'50%',transform:'translate(-50%,-50%)',textAlign:'center'}}>
+                <div style={{fontSize:16}}>🔒</div>
+                <div style={{color:'#ffd700',fontSize:8,fontWeight:900,whiteSpace:'nowrap'}}>⭐{c.unlock}</div>
+              </div>}
+              <div style={{color:unlocked?c.ac:'rgba(255,255,255,.3)',fontSize:9,fontWeight:900,letterSpacing:1,marginTop:2}}>{c.en}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <button onClick={()=>setScr('difficulty')} className="apulse" style={{background:'linear-gradient(135deg,#7c4dff,#e040fb)',border:'none',borderRadius:28,padding:'17px 52px',color:'white',fontSize:18,fontWeight:900,letterSpacing:2,boxShadow:'0 8px 30px rgba(124,77,255,.55)',zIndex:2}}>
+        はじめる！ ✨
+      </button>
+    </div>
+  );
+
+  /* ══ DIFFICULTY ══ */
+  if(scr==='difficulty')return(
+    <div className="afin" style={{background:'linear-gradient(180deg,#0a0020,#1a0035)',minHeight:680,padding:20,display:'flex',flexDirection:'column'}}>
+      {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+        <button onClick={()=>setScr('title')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 15px',color:'white',fontWeight:800,fontSize:13}}>← もどる</button>
+        <div style={{color:'#ce93d8',fontWeight:900,fontSize:15}}>難易度をえらぼう</div>
+        <div style={{width:70}}/>
+      </div>
+      <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'center',gap:14}}>
+        {DIFFS.map(d=>(
+          <button key={d.id} onClick={()=>{setDiff(d.id);setScr('charselect');}} style={{background:`linear-gradient(135deg,${d.c}22,${d.c}44)`,border:`2px solid ${d.c}66`,borderRadius:22,padding:'22px 18px',display:'flex',alignItems:'center',gap:16,textAlign:'left',boxShadow:`0 4px 22px ${d.gl}`}}>
+            <div style={{fontSize:44,flexShrink:0}}>{d.e}</div>
+            <div>
+              <div style={{color:d.c,fontSize:10,fontWeight:900,letterSpacing:3,marginBottom:4}}>{d.n.toUpperCase()}</div>
+              <div style={{color:'white',fontSize:22,fontWeight:900,marginBottom:4}}>{d.n}</div>
+              <div style={{color:'rgba(255,255,255,.6)',fontSize:13}}>{d.desc}</div>
+            </div>
+          </button>
+        ))}
+      </div>
+      <div style={{textAlign:'center',marginTop:16,color:'rgba(255,255,255,.3)',fontSize:12}}>難しいほど⭐がたくさん集まるよ！</div>
+    </div>
+  );
+
+  /* ══ CHAR SELECT ══ */
+  if(scr==='charselect')return(
+    <div className="afin" style={{background:'linear-gradient(180deg,#0a0020,#1a0035)',minHeight:680,padding:20,display:'flex',flexDirection:'column'}}>
+      {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+        <button onClick={()=>setScr('difficulty')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 15px',color:'white',fontWeight:800,fontSize:13}}>← もどる</button>
+        <div style={{color:'#ce93d8',fontWeight:900,fontSize:15}}>キャラをえらぼう</div>
+        <div style={{width:70}}/>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:10,flex:1,overflowY:'auto'}}>
+        {CHARS.map(c=>{
+          const unlocked=totalStars>=c.unlock;
+          return(
+            <button key={c.id} onClick={()=>{if(unlocked)pickChar(c.id);}} disabled={!unlocked}
+              style={{background:unlocked?`linear-gradient(135deg,${c.bg[0]},${c.bg[1]})`:'rgba(255,255,255,.04)',border:`2px solid ${unlocked?c.ac+'44':'rgba(255,255,255,.08)'}`,borderRadius:20,padding:'12px',display:'flex',alignItems:'center',gap:12,textAlign:'left',boxShadow:unlocked?`0 4px 20px ${c.gl}`:'none',opacity:unlocked?1:.65,position:'relative',overflow:'hidden'}}>
+              <div style={{filter:unlocked?`drop-shadow(0 0 12px ${c.ac})`:'grayscale(1)',flexShrink:0}}>
+                <ChibiChar cid={c.id} hci={c.dh} hsi={c.ds} oci={c.do} schi={c.ds2} acci={c.da} size={84}/>
+              </div>
+              <div style={{flex:1}}>
+                <div style={{color:unlocked?c.ac:'rgba(255,255,255,.4)',fontSize:9,fontWeight:900,letterSpacing:3,marginBottom:2}}>{c.en}</div>
+                <div style={{color:unlocked?'white':'rgba(255,255,255,.5)',fontSize:20,fontWeight:900,marginBottom:4}}>{c.n}</div>
+                <div style={{color:'rgba(255,255,255,.55)',fontSize:11,marginBottom:unlocked?6:0}}>{c.desc}</div>
+                {unlocked?<div style={{background:'rgba(255,255,255,.1)',borderRadius:8,padding:'3px 10px',display:'inline-block'}}><span style={{color:'#ffd700',fontSize:10,fontWeight:800}}>⚡ {c.sp}</span></div>:
+                  <div style={{display:'flex',alignItems:'center',gap:6,marginTop:4}}>
+                    <span style={{fontSize:18}}>🔒</span>
+                    <div style={{background:'rgba(255,215,0,.15)',borderRadius:8,padding:'4px 10px',border:'1px solid rgba(255,215,0,.3)'}}>
+                      <span style={{color:'#ffd700',fontSize:11,fontWeight:900}}>⭐ {c.unlock} で アンロック</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  /* ══ CUSTOMIZE ══ */
+  if(scr==='customize'&&char){
+    const tabs=[{id:'hair',l:'かみ',e:'💇'},{id:'outfit',l:'ふく',e:'👗'},{id:'shoes',l:'くつ',e:'👟'},{id:'acc',l:'アクセ',e:'💎'}];
+    return(
+      <div className="afin" style={{background:`linear-gradient(160deg,${char.bg[0]},${char.bg[1]})`,minHeight:680,display:'flex',flexDirection:'column'}}>
+        {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 20px 0'}}>
+          <button onClick={()=>setScr('charselect')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 15px',color:'white',fontWeight:800,fontSize:13}}>← もどる</button>
+          <div style={{color:char.ac,fontWeight:900,fontSize:14}}>コーデをきめよう！</div>
+          <div style={{width:70}}/>
+        </div>
+        <div style={{display:'flex',justifyContent:'center',padding:'8px 0 2px'}}>
+          <div style={{filter:`drop-shadow(0 0 22px ${char.ac})`}}>
+            <ChibiChar cid={cid} hci={cu.hc} hsi={cu.hs} oci={cu.oc} schi={cu.sc} acci={cu.ac} size={124} anim="idle"/>
+          </div>
+        </div>
+        <div style={{textAlign:'center',color:char.ac,fontWeight:900,fontSize:17,letterSpacing:2,marginBottom:6,textShadow:`0 0 14px ${char.ac}`}}>{char.n}</div>
+        <div style={{display:'flex',gap:6,padding:'0 16px'}}>
+          {tabs.map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:'7px 4px',borderRadius:12,border:tab===t.id?`2px solid ${char.ac}`:'2px solid rgba(255,255,255,.1)',background:tab===t.id?char.ac+'44':'rgba(255,255,255,.05)',color:'white',fontSize:10,fontWeight:800}}>
+            <div style={{fontSize:15,marginBottom:2}}>{t.e}</div>{t.l}
+          </button>)}
+        </div>
+        <div style={{flex:1,padding:'10px 18px',overflowY:'auto'}}>
+          {tab==='hair'&&<div>
+            <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>かみのいろ</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}>
+              {HC.map((h,i)=><button key={i} onClick={()=>setCu(c=>({...c,hc:i}))} style={{width:40,height:40,borderRadius:'50%',background:h.c,border:cu.hc===i?'3px solid white':'3px solid transparent',boxShadow:cu.hc===i?`0 0 12px ${h.c}`:'none',transition:'all .15s'}} title={HN[i]}/>)}
+            </div>
+            <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>スタイル</div>
+            <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>
+              {HS.map((h,i)=><button key={i} onClick={()=>setCu(c=>({...c,hs:i}))} style={{padding:'7px 12px',borderRadius:11,background:cu.hs===i?char.ac:'rgba(255,255,255,.08)',border:cu.hs===i?'2px solid white':'2px solid transparent',color:'white',fontSize:11,fontWeight:800}}>{h.n}</button>)}
+            </div>
+          </div>}
+          {tab==='outfit'&&<div>
+            <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>ふくのいろ</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              {OC.map((o,i)=><button key={i} onClick={()=>setCu(c=>({...c,oc:i}))} style={{width:40,height:40,borderRadius:9,background:o.c,border:cu.oc===i?'3px solid white':'3px solid transparent',boxShadow:cu.oc===i?`0 0 12px ${o.c}`:'none',transition:'all .15s'}}/>)}
+            </div>
+          </div>}
+          {tab==='shoes'&&<div>
+            <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>くつのいろ</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              {SC.map((s,i)=><button key={i} onClick={()=>setCu(c=>({...c,sc:i}))} style={{width:40,height:40,borderRadius:'50%',background:s.c,border:cu.sc===i?'3px solid white':'3px solid transparent',boxShadow:cu.sc===i?`0 0 12px ${s.c}`:'none',transition:'all .15s',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>👟</button>)}
+            </div>
+          </div>}
+          {tab==='acc'&&<div>
+            <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>アクセサリー</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
+              {ACS.map((a,i)=><button key={i} onClick={()=>setCu(c=>({...c,ac:i}))} style={{padding:'10px 6px',borderRadius:12,background:cu.ac===i?char.ac+'44':'rgba(255,255,255,.07)',border:cu.ac===i?`2px solid ${char.ac}`:'2px solid rgba(255,255,255,.1)',color:'white',fontSize:10,fontWeight:800}}>
+                <div style={{fontSize:20,marginBottom:3}}>{a.e}</div>{a.n}
+              </button>)}
+            </div>
+          </div>}
+        </div>
+        <div style={{padding:'0 20px 22px'}}>
+          <button onClick={startAdventure} style={{width:'100%',padding:'16px',borderRadius:20,background:`linear-gradient(135deg,${char.ac},#e040fb)`,border:'none',color:'white',fontSize:18,fontWeight:900,letterSpacing:2,boxShadow:`0 10px 28px ${char.gl}`}}>
+            ぼうけんかいし！ ⚔️
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ══ STORY ══ */
+  if(scr==='story'&&story){
+    const bg=story.bg||['#0a0020','#1a0035'];
+    const isCend=story.type==='cend',isEnd=story.type==='end';
+    return(
+      <div className="afin" style={{background:`linear-gradient(160deg,${bg[0]},${bg[1]})`,minHeight:680,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center',position:'relative',overflow:'hidden'}}>
+        {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
+        {STARS.slice(0,12).map((s,i)=><div key={i} style={{position:'absolute',width:s.s,height:s.s,background:'white',borderRadius:'50%',left:s.x+'%',top:s.y+'%',opacity:.18,animation:`twinkle ${s.d}s ease-in-out infinite`,animationDelay:s.dl+'s'}}/>)}
+        {(isCend||isEnd)&&['⭐','✨','🌟'].map((e,i)=>[0,1,2,3].map(j=><div key={`${i}${j}`} style={{position:'absolute',fontSize:rnd(14,24),left:rnd(5,90)+'%',top:rnd(5,90)+'%',opacity:.5,animation:`float ${1+Math.random()*2}s ease-in-out infinite`,animationDelay:`${Math.random()*2}s`}}>{e}</div>))}
+        {story.ch&&<div style={{background:'rgba(255,255,255,.1)',border:'2px solid rgba(255,255,255,.2)',borderRadius:20,padding:'5px 18px',fontSize:11,fontWeight:900,letterSpacing:3,color:'rgba(255,255,255,.8)',marginBottom:12,zIndex:2}}>CHAPTER {story.ch}</div>}
+        <div className={isCend||isEnd?'apop':'af'} style={{fontSize:isEnd?80:isCend?70:58,marginBottom:10,zIndex:2}}>{story.icon}</div>
+        <div style={{fontSize:isCend||isEnd?26:22,fontWeight:900,color:'white',marginBottom:story.sub?4:10,textShadow:'0 0 20px rgba(255,255,255,.3)',zIndex:2,lineHeight:1.2}}>{story.title}</div>
+        {story.sub&&<div style={{fontSize:13,color:'rgba(255,255,255,.6)',fontWeight:700,marginBottom:12,zIndex:2}}>{story.sub}</div>}
+        <div style={{background:'rgba(0,0,0,.35)',borderRadius:16,padding:'14px 18px',marginBottom:14,border:'1px solid rgba(255,255,255,.1)',zIndex:2,maxWidth:310}}>
+          <div style={{color:'rgba(255,255,255,.85)',fontSize:14,lineHeight:2,fontWeight:700,whiteSpace:'pre-line'}}>{story.text}</div>
+        </div>
+        {isCend&&<div>
+          <div style={{color:'#ffd700',fontSize:18,fontWeight:900,marginBottom:4,zIndex:2}}>⭐ あつめた: {totalStars} スター</div>
+          <div style={{color:curTitle.color,fontSize:14,fontWeight:800,marginBottom:12,zIndex:2}}>{curTitle.icon} {curTitle.title}</div>
+        </div>}
+        {isCend&&char&&<div style={{marginBottom:12,filter:`drop-shadow(0 0 20px ${char.ac})`,zIndex:2}}><ChibiChar cid={cid} hci={cu.hc} hsi={cu.hs} oci={cu.oc} schi={cu.sc} acci={cu.ac} size={86} anim="victory"/></div>}
+        {isEnd&&<div style={{display:'flex',gap:8,marginBottom:14,zIndex:2}}>
+          {CHARS.filter(c=>totalStars>=c.unlock).map((c,i)=><div key={c.id} className="af" style={{animationDelay:`${i*.3}s`,filter:`drop-shadow(0 0 14px ${c.ac})`}}>
+            <ChibiChar cid={c.id} hci={c.dh} hsi={c.ds} oci={c.do} schi={c.ds2} acci={c.da} size={72} anim="victory"/>
+          </div>)}
+        </div>}
+        <button onClick={storyNext} style={{width:'100%',maxWidth:280,padding:'16px',borderRadius:20,background:isCend||isEnd?'linear-gradient(135deg,#4caf50,#8bc34a)':'linear-gradient(135deg,#7c4dff,#e040fb)',border:'none',color:'white',fontSize:17,fontWeight:900,boxShadow:isCend||isEnd?'0 8px 24px rgba(76,175,80,.4)':'0 8px 24px rgba(124,77,255,.4)',zIndex:2}}>
+          {story.btn} {isCend?'🚀':isEnd?'🎮':'→'}
+        </button>
+      </div>
+    );
+  }
+
+  const ACOLS=[{bg:'#7c4dff',gl:'rgba(124,77,255,.5)'},{bg:'#00acc1',gl:'rgba(0,172,193,.5)'},{bg:'#e65100',gl:'rgba(230,81,0,.5)'},{bg:'#c62828',gl:'rgba(198,40,40,.5)'}];
+
+  /* ══ BATTLE ══ */
+  if(scr==='battle')return(
+    <div style={{background:'linear-gradient(180deg,#080018 0%,#120020 60%,#0a000a 100%)',minHeight:680,display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+      {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
+      {/* ── 着替えオーバーレイ ── */}
+      {showCostume&&(
+        <div style={{position:'absolute',inset:0,zIndex:50,background:'rgba(0,0,8,.94)',display:'flex',flexDirection:'column'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 18px 0',flexShrink:0}}>
+            <div style={{color:char?.ac,fontWeight:900,fontSize:15}}>👗 着替え中！</div>
+            <button onClick={()=>setShowCostume(false)} style={{background:`linear-gradient(135deg,${char?.ac||'#7c4dff'},#e040fb)`,border:'none',borderRadius:14,padding:'8px 16px',color:'white',fontWeight:900,fontSize:13}}>✨ 決定！</button>
+          </div>
+          <div style={{display:'flex',justifyContent:'center',padding:'8px 0 2px',flexShrink:0}}>
+            <div style={{filter:`drop-shadow(0 0 18px ${char?.ac||'#7c4dff'})`}}>
+              <ChibiChar cid={cid} hci={cu.hc} hsi={cu.hs} oci={cu.oc} schi={cu.sc} acci={cu.ac} size={110} anim="idle"/>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:5,padding:'0 14px 8px',flexShrink:0}}>
+            {[{id:'hair',l:'かみ',e:'💇'},{id:'outfit',l:'ふく',e:'👗'},{id:'shoes',l:'くつ',e:'👟'},{id:'acc',l:'アクセ',e:'💎'}].map(t=><button key={t.id} onClick={()=>setCosTab(t.id)} style={{flex:1,padding:'6px 4px',borderRadius:11,border:cosTab===t.id?`2px solid ${char?.ac||'#7c4dff'}`:'2px solid rgba(255,255,255,.1)',background:cosTab===t.id?(char?.ac||'#7c4dff')+'44':'rgba(255,255,255,.05)',color:'white',fontSize:10,fontWeight:800}}>
+              <div style={{fontSize:14,marginBottom:2}}>{t.e}</div>{t.l}
+            </button>)}
+          </div>
+          <div style={{flex:1,overflowY:'auto',padding:'0 16px 10px'}}>
+            {cosTab==='hair'&&<div>
+              <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>かみのいろ</div>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}>{HC.map((h,i)=><button key={i} onClick={()=>setCu(c=>({...c,hc:i}))} style={{width:38,height:38,borderRadius:'50%',background:h.c,border:cu.hc===i?'3px solid white':'3px solid transparent',boxShadow:cu.hc===i?`0 0 10px ${h.c}`:'none'}}/>)}</div>
+              <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>スタイル</div>
+              <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>{HS.map((h,i)=><button key={i} onClick={()=>setCu(c=>({...c,hs:i}))} style={{padding:'6px 10px',borderRadius:10,background:cu.hs===i?(char?.ac||'#7c4dff'):'rgba(255,255,255,.08)',border:cu.hs===i?'2px solid white':'2px solid transparent',color:'white',fontSize:11,fontWeight:800}}>{h.n}</button>)}</div>
+            </div>}
+            {cosTab==='outfit'&&<div>
+              <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>ふくのいろ</div>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{OC.map((o,i)=><button key={i} onClick={()=>setCu(c=>({...c,oc:i}))} style={{width:38,height:38,borderRadius:8,background:o.c,border:cu.oc===i?'3px solid white':'3px solid transparent',boxShadow:cu.oc===i?`0 0 10px ${o.c}`:'none'}}/>)}</div>
+            </div>}
+            {cosTab==='shoes'&&<div>
+              <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>くつのいろ</div>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{SC.map((s,i)=><button key={i} onClick={()=>setCu(c=>({...c,sc:i}))} style={{width:38,height:38,borderRadius:'50%',background:s.c,border:cu.sc===i?'3px solid white':'3px solid transparent',boxShadow:cu.sc===i?`0 0 10px ${s.c}`:'none',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15}}>👟</button>)}</div>
+            </div>}
+            {cosTab==='acc'&&<div>
+              <div style={{color:'rgba(255,255,255,.5)',fontSize:11,fontWeight:800,marginBottom:8}}>アクセサリー</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:7}}>{ACS.map((a,i)=><button key={i} onClick={()=>setCu(c=>({...c,ac:i}))} style={{padding:'8px 5px',borderRadius:11,background:cu.ac===i?(char?.ac||'#7c4dff')+'44':'rgba(255,255,255,.07)',border:cu.ac===i?`2px solid ${char?.ac||'#7c4dff'}`:'2px solid rgba(255,255,255,.1)',color:'white',fontSize:10,fontWeight:800}}>
+                <div style={{fontSize:18,marginBottom:2}}>{a.e}</div>{a.n}
+              </button>)}</div>
+            </div>}
+          </div>
+        </div>
+      )}
+      {STARS.slice(0,10).map((s,i)=><div key={i} style={{position:'absolute',width:s.s,height:s.s,background:'white',borderRadius:'50%',left:s.x+'%',top:(s.y*.4)+'%',opacity:.15}}/>)}
+      <div style={{padding:'10px 14px 7px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid rgba(255,255,255,.05)'}}>
+        <button onClick={()=>setScr('customize')} style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(255,255,255,.1)',borderRadius:11,padding:'6px 10px',color:'white',fontWeight:800,fontSize:11}}>← やめる</button>
+        <div style={{textAlign:'center'}}>
+          <div style={{color:curTitle.color,fontSize:10,fontWeight:800}}>{curTitle.icon} {curTitle.title}</div>
+          <div style={{color:'#ffd700',fontSize:12,fontWeight:900}}>⭐ {totalStars} / 今回 {stars}</div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:5}}>
+          <button onClick={()=>{setShowCostume(true);setCosTab('hair');}} style={{background:`linear-gradient(135deg,${char?.ac||'#7c4dff'}44,${char?.ac||'#7c4dff'}22)`,border:`1px solid ${char?.ac||'#7c4dff'}66`,borderRadius:10,padding:'5px 9px',color:'white',fontWeight:900,fontSize:14}}>👗</button>
+          <div style={{display:'flex',gap:3}}>{[0,1,2].map(i=><span key={i} style={{fontSize:18,filter:i<php?'none':'grayscale(1)',transition:'filter .3s'}}>❤️</span>)}</div>
+        </div>
+      </div>
+      <div className={isSh?'shaking':''} style={{position:'relative',padding:'6px 14px 0',minHeight:210,display:'flex',alignItems:'flex-end',justifyContent:'space-between'}}>
+        <div style={{textAlign:'center',zIndex:2}}>
+          <div style={{filter:`drop-shadow(0 0 16px ${char?.ac||'#fff'})`}}>
+            <ChibiChar cid={cid} hci={cu.hc} hsi={cu.hs} oci={cu.oc} schi={cu.sc} acci={cu.ac} size={100} anim={panim}/>
+          </div>
+          <div style={{color:char?.ac,fontSize:10,fontWeight:900}}>{char?.n}</div>
+        </div>
+        <div style={{flex:1,textAlign:'center',position:'relative',zIndex:3}}>
+          {streak>=2&&<div className="apulse" style={{background:'linear-gradient(135deg,#ff6d00,#ff9800)',borderRadius:10,padding:'4px 10px',color:'white',fontSize:10,fontWeight:900,whiteSpace:'nowrap'}}>🔥 {streak}れんぞく！</div>}
+        </div>
+        <div style={{textAlign:'center',zIndex:2}}>
+          <div className={eanim==='attack'?'aeAtk':eanim==='hurt'?'ahurt':''} style={{filter:`drop-shadow(0 0 14px ${enemy.c})`}}>
+            <EnemySVG eid={enemy.id} sz={100}/>
+          </div>
+          <div style={{width:110,background:'rgba(255,255,255,.1)',borderRadius:6,height:9,border:'1px solid rgba(255,255,255,.12)',overflow:'hidden',marginTop:4}}>
+            <div style={{height:'100%',borderRadius:6,background:ehp/enemy.hp>.5?'#4caf50':ehp/enemy.hp>.25?'#ff9800':'#f44336',width:(ehp/enemy.hp*100)+'%',transition:'width .45s ease'}}/>
+          </div>
+          <div style={{color:'rgba(255,255,255,.35)',fontSize:10,marginTop:2}}>{ehp}/{enemy.hp}</div>
+        </div>
+        <div style={{position:'absolute',bottom:0,left:0,right:0,height:2,background:'linear-gradient(90deg,transparent,rgba(124,77,255,.4),transparent)'}}/>
+        {/* ─── ATTACK EFFECTS OVERLAY ─── */}
+        {efx.map(e=>{
+          if(e.type==='proj')return(
+            <div key={e.id} style={{position:'absolute',top:'36%',left:e.fp?'18%':'64%',fontSize:e.sz||30,lineHeight:1,filter:`drop-shadow(0 0 14px ${e.c}) drop-shadow(0 0 6px ${e.c})`,animation:`${e.fp?'flyR':'flyL'} .52s cubic-bezier(.2,.8,.4,1) forwards`,pointerEvents:'none',zIndex:10}}>
+              {e.em}
+            </div>
+          );
+          if(e.type==='burst')return(
+            <div key={e.id} style={{position:'absolute',top:'28%',left:e.x,width:e.big?90:60,height:e.big?90:60,borderRadius:'50%',background:`radial-gradient(circle,${e.c}cc 0%,${e.c}44 40%,transparent 70%)`,animation:e.big?'hitBig .65s ease forwards':'hitB .55s ease forwards',pointerEvents:'none',zIndex:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:e.big?40:26}}>
+              {e.big?'💥':'✦'}
+            </div>
+          );
+          if(e.type==='ring')return(
+            <div key={e.id} style={{position:'absolute',top:'28%',left:e.x,width:70,height:70,borderRadius:'50%',border:`3px solid ${e.c}`,animation:'sparkRing .7s ease forwards',pointerEvents:'none',zIndex:8}}/>
+          );
+          if(e.type==='dmg')return(
+            <div key={e.id} style={{position:'absolute',top:'4%',left:e.x,color:e.c,fontSize:e.big?46:32,fontWeight:900,textShadow:`0 0 16px ${e.c},0 0 30px ${e.c}88,0 3px 6px rgba(0,0,0,.9)`,animation:'dmgF 1.15s cubic-bezier(.2,.8,.4,1) forwards',pointerEvents:'none',zIndex:12,fontFamily:"'Nunito',sans-serif",letterSpacing:-1}}>
+              -{e.val}{e.big&&<span style={{fontSize:22}}> !!</span>}
+            </div>
+          );
+          if(e.type==='label')return(
+            <div key={e.id} style={{position:'absolute',bottom:'3%',left:'50%',textAlign:'center',animation:'atkN 1.15s ease forwards',pointerEvents:'none',zIndex:12}}>
+              <div style={{fontSize:9,color:'rgba(255,255,255,.45)',fontWeight:700,letterSpacing:1}}>{e.n}</div>
+              <div style={{color:e.c,fontSize:15,fontWeight:900,textShadow:`0 0 12px ${e.c},0 0 24px ${e.c}66`,whiteSpace:'nowrap'}}>{e.t}</div>
+            </div>
+          );
+          return null;
+        })}
+      </div>
+      {bmsg&&<div style={{margin:'5px 14px 0',background:'rgba(255,255,255,.04)',borderRadius:11,padding:'5px 12px',color:'rgba(255,255,255,.7)',fontSize:11,fontWeight:800,textAlign:'center',border:'1px solid rgba(255,255,255,.06)'}}>{bmsg}</div>}
+      {prob&&<div style={{margin:'7px 14px 0',background:'rgba(5,0,20,.92)',borderRadius:20,padding:'13px 14px 15px',border:`2px solid ${wrong?'#f44336':'rgba(124,77,255,.3)'}`,transition:'border-color .3s'}}>
+        <div key={wkey} className={wrong?'ashake':''}>
+          {wrong&&<div style={{color:'#f44336',fontSize:12,fontWeight:900,textAlign:'center',marginBottom:7}}>まちがい！もういちど！💪</div>}
+          <div style={{textAlign:'center',color:'rgba(255,255,255,.3)',fontSize:10,fontWeight:700,marginBottom:3}}>もんだい {qn}</div>
+          <div style={{textAlign:'center',fontSize:42,fontWeight:900,color:'white',letterSpacing:8,lineHeight:1.15,textShadow:'0 0 18px rgba(200,150,255,.4)'}}>{prob.a} {prob.op} {prob.b}</div>
+          <div style={{textAlign:'center',fontSize:26,fontWeight:900,color:char?.ac||'#7c4dff'}}>= ?</div>
+          {wrong&&<div style={{textAlign:'center',color:'rgba(255,255,255,.22)',fontSize:11,marginTop:5}}>ヒント: {prob.a} と {prob.b}</div>}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:11}}>
+          {chs.map((v,i)=><button key={v} onClick={()=>doAnswer(v)} style={{padding:'14px 0',borderRadius:14,background:`linear-gradient(135deg,${ACOLS[i].bg}cc,${ACOLS[i].bg})`,border:`2px solid ${ACOLS[i].bg}`,color:'white',fontSize:26,fontWeight:900,boxShadow:`0 4px 16px ${ACOLS[i].gl}`}}>{v}</button>)}
+        </div>
+      </div>}
+    </div>
+  );
+
+  /* ══ DEFEAT ══ */
+  if(scr==='defeat')return(
+    <div className="afin" style={{background:'linear-gradient(180deg,#1a0000,#300000)',minHeight:680,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+      {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
+      <div style={{fontSize:68,marginBottom:10}}>💫</div>
+      <div style={{fontSize:34,fontWeight:900,color:'#ef5350',marginBottom:5}}>まけちゃった...</div>
+      <div style={{fontSize:13,color:'#ef9a9a',marginBottom:6}}>つぎはかてるよ！がんばれ！</div>
+      <div style={{color:curTitle.color,fontSize:14,fontWeight:800,marginBottom:20}}>{curTitle.icon} {curTitle.title} / ⭐ {totalStars}</div>
+      <div style={{marginBottom:24,opacity:.75}}><ChibiChar cid={cid} hci={cu.hc} hsi={cu.hs} oci={cu.oc} schi={cu.sc} acci={cu.ac} size={105}/></div>
+      <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%'}}>
+        <button onClick={retryBattle} style={{padding:'16px',borderRadius:20,background:'linear-gradient(135deg,#e91e8c,#7c4dff)',border:'none',color:'white',fontSize:17,fontWeight:900,boxShadow:'0 8px 24px rgba(233,30,140,.4)'}}>もういちどちょうせん！🔥</button>
+        <button onClick={()=>setScr('title')} style={{padding:'12px',borderRadius:20,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',color:'rgba(255,255,255,.45)',fontSize:12,fontWeight:700}}>タイトルへ</button>
+      </div>
+    </div>
+  );
+
+  return null;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

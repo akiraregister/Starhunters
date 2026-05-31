@@ -39,6 +39,8 @@ button:active{transform:scale(.95);}
 .afup{animation:fup 1.2s ease forwards;}
 .atpop{animation:titlePop .6s cubic-bezier(.17,.67,.45,1.4) forwards;}
 .ashimmer{animation:shimmer 1.5s ease-in-out infinite;}
+@keyframes pathDot{0%,100%{opacity:.15}50%{opacity:.7}}
+@keyframes stageGlow{0%,100%{box-shadow:0 6px 28px rgba(0,0,0,.4)}50%{box-shadow:0 8px 36px rgba(255,255,255,.08)}}
 /* ── ATTACK EFFECTS v5 ── */
 @keyframes flyR{0%{opacity:0;transform:translateX(0) translateY(0) scale(.3)}15%{opacity:1;transform:translateX(12px) translateY(-6px) scale(1.3)}85%{opacity:1;transform:translateX(170px) translateY(-18px) scale(1)}100%{opacity:0;transform:translateX(210px) translateY(-28px) scale(.6)}}
 @keyframes flyL{0%{opacity:0;transform:translateX(0) translateY(0) scale(.3)}15%{opacity:1;transform:translateX(-12px) translateY(-6px) scale(1.3)}85%{opacity:1;transform:translateX(-170px) translateY(-18px) scale(1)}100%{opacity:0;transform:translateX(-210px) translateY(-28px) scale(.6)}}
@@ -60,6 +62,82 @@ button:active{transform:scale(.95);}
 <script type="text/babel">
 const{useState,useEffect,useRef}=React;
 const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+/* ═══════════════════════════════════════
+   🎵 AUDIO SYSTEM — Web Audio API
+   ═══════════════════════════════════════ */
+let _actx=null;
+function AC(){
+  if(!_actx){try{_actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  if(_actx&&_actx.state==='suspended')_actx.resume();
+  return _actx;
+}
+function beep(freq,dur,type='square',vol=0.13,delay=0){
+  const c=AC();if(!c)return;
+  const o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);
+  o.type=type;o.frequency.value=freq;
+  const t=c.currentTime+delay;
+  g.gain.setValueAtTime(vol,t);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.start(t);o.stop(t+dur+0.05);
+}
+const SFX={
+  correct:()=>{beep(523,.06,'square',.11);beep(659,.08,'square',.11,.08);beep(784,.18,'square',.11,.16);},
+  wrong:()=>{beep(220,.05,'sawtooth',.13);beep(165,.20,'sawtooth',.09,.06);},
+  attack:(cid)=>{
+    const m={luna:[[494,.06],[659,.07],[784,.06]],hana:[[440,.05],[660,.06],[880,.07]],mira:[[330,.04],[220,.05],[440,.08]],rin:[[1047,.04],[1319,.06]],sora:[[659,.05],[784,.06],[988,.08]]};
+    (m[cid]||m.luna).forEach(([f,d],i)=>beep(f,d,'square',.09,i*.06));
+  },
+  combo:()=>{[523,659,784,1047].forEach((f,i)=>beep(f,.1,'square',.14,i*.07));},
+  critical:()=>{[392,523,659,784,1047,1319].forEach((f,i)=>beep(f,.1,'square',.15,i*.06));},
+  victory:()=>{[523,659,784,1047,1319,1568].forEach((f,i)=>beep(f,.16,'square',.12,i*.09));},
+  defeat:()=>{[440,370,311,262,220].forEach((f,i)=>beep(f,.17,'sawtooth',.12,i*.13));},
+  unlock:()=>{[659,784,988,1047,1319].forEach((f,i)=>beep(f,.13,'square',.13,i*.09));},
+  mapTap:()=>{beep(659,.07,'square',.1);beep(784,.12,'square',.1,.08);},
+  titleTap:()=>{beep(784,.06,'square',.1);beep(988,.1,'square',.1,.07);},
+};
+
+/* BGM — look-ahead scheduler (clean loop) */
+const BPM=150,BEAT=60/BPM;
+const BATTLE_BGM=[
+  [659,.25],[0,.25],[523,.25],[659,.25],[784,.25],[0,.25],[659,.25],[523,.25],
+  [587,.25],[659,.25],[587,.25],[523,.25],[440,.25],[0,.5],[0,.25],
+  [784,.25],[0,.25],[659,.25],[784,.25],[880,.25],[0,.25],[784,.25],[659,.25],
+  [587,.5],[523,.25],[440,.25],[392,.25],[0,.5],[0,.25],
+  [523,.25],[659,.25],[784,.25],[659,.25],[523,.5],[440,.25],[392,.25],
+  [440,.25],[523,.25],[440,.25],[392,.25],[349,.5],[0,.5],
+  [523,.25],[587,.25],[659,.25],[587,.25],[523,.5],[392,.25],[440,.25],
+  [523,.25],[659,.25],[784,.5],[0,.5],[0,.25],[0,.25],
+];
+let _bgmActive=false,_bgmInterval=null,_bgmIdx=0,_bgmNext=0;
+function _bgmTick(){
+  const c=AC();if(!c||!_bgmActive)return;
+  while(_bgmNext<c.currentTime+0.15){
+    const[freq,dur]=BATTLE_BGM[_bgmIdx];
+    if(freq>0){
+      const o=c.createOscillator(),g=c.createGain();
+      o.connect(g);g.connect(c.destination);
+      o.type='square';o.frequency.value=freq;
+      const t=_bgmNext;
+      g.gain.setValueAtTime(0.055,t);
+      g.gain.setValueAtTime(0.055,t+dur*BEAT*0.65);
+      g.gain.linearRampToValueAtTime(0,t+dur*BEAT*0.88);
+      o.start(t);o.stop(t+dur*BEAT);
+    }
+    _bgmNext+=dur*BEAT;
+    _bgmIdx=(_bgmIdx+1)%BATTLE_BGM.length;
+  }
+}
+function startBGM(){
+  const c=AC();if(!c||_bgmActive)return;
+  _bgmActive=true;_bgmIdx=0;_bgmNext=c.currentTime+0.05;
+  _bgmInterval=setInterval(_bgmTick,80);_bgmTick();
+}
+function stopBGM(){
+  _bgmActive=false;
+  if(_bgmInterval){clearInterval(_bgmInterval);_bgmInterval=null;}
+}
 
 /* ── ATTACK DATA ── キャラごとに3種類のわざ (0,1=通常, 2=コンボ専用) */
 const CHAR_ATKS={
@@ -120,11 +198,6 @@ const ENEMIES=[
   {id:3,n:'ダークウィッチ', hp:10,c:'#1a237e'},
   {id:4,n:'ドラゴンキング', hp:15,c:'#b71c1c'},
 ];
-const DIFFS=[
-  {id:'easy',  n:'やさしい',   e:'🌟',desc:'１けたのたしざん',c:'#2e7d32',gl:'rgba(46,125,50,.5)'},
-  {id:'normal',n:'ふつう',     e:'⚡',desc:'たしざんとひきざん',c:'#1565c0',gl:'rgba(21,101,192,.5)'},
-  {id:'hard',  n:'むずかしい', e:'🔥',desc:'２けた・ひきざん・かけざん',c:'#b71c1c',gl:'rgba(183,28,28,.5)'},
-];
 const SEQ=[
   {t:'story',k:'ch1'},{t:'battle',ei:0},{t:'story',k:'b0'},
   {t:'battle',ei:1},{t:'story',k:'ch1e'},
@@ -145,9 +218,11 @@ const STORIES={
 const STARS=Array.from({length:22},()=>({x:rnd(2,96),y:rnd(2,96),s:Math.random()<.3?3:2,d:1.5+Math.random()*2,dl:Math.random()*2}));
 
 function genProb(diff,ei){
+  // Fix #4: null diff guard — fall back to 'easy' if diff not yet set
+  const d=diff||'easy';
   let a,b,op,ans;
-  if(diff==='easy'){const mx=Math.min(3+ei,7);a=rnd(1,mx);b=rnd(1,mx);op='+';ans=a+b;}
-  else if(diff==='normal'){
+  if(d==='easy'){const mx=Math.min(3+ei,7);a=rnd(1,mx);b=rnd(1,mx);op='+';ans=a+b;}
+  else if(d==='normal'){
     if(ei<2){a=rnd(1,9);b=rnd(1,9);op='+';ans=a+b;}
     else if(Math.random()<.5){a=rnd(1,9);b=rnd(1,9);op='+';ans=a+b;}
     else{b=rnd(1,8);a=b+rnd(1,9);op='−';ans=a-b;}
@@ -240,98 +315,110 @@ function EnemySVG({eid,sz=100}){
   return D[eid]||D[0];
 }
 
-/* ── ROADMAP SCREEN ── */
-function RoadmapScreen({totalStars,completedDiffs,onClose}){
+/* ── WORLDS (map stages) ── */
+const WORLDS=[
+  {id:'easy', name:'まほうの森',             sub:'冒険のはじまり！',              icon:'🌲',bigIcon:'🌲',
+   c:'#2e7d32',gl:'rgba(46,125,50,.6)',      bg:['#071407','#0f2010'],
+   enemies:['🟣 ダークスライム','👻 ゴーストちゃん'], math:'１けたのたしざん',
+   story:'まほうの森に闇のモンスターが出た！\nたおして森を守ろう！',
+   starBg:'#0a1a0a',particle:'🍃'},
+  {id:'normal',name:'ゴーストキャッスル',    sub:'呪いの古城に乗り込め！',        icon:'🏰',bigIcon:'🏰',
+   c:'#1565c0',gl:'rgba(21,101,192,.6)',     bg:['#080020','#1a0035'],
+   enemies:['🕷️ クモのまじん','🧙 ダークウィッチ'],math:'たしざん＋ひきざん',
+   story:'古城が呪いにかかっている...\n仲間と力を合わせて立ち向かえ！',
+   starBg:'#0a0020',particle:'✨'},
+  {id:'hard',  name:'ドラゴンキング最終決戦', sub:'世界平和をかけた最終決戦！',   icon:'🐲',bigIcon:'🔥',
+   c:'#b71c1c',gl:'rgba(183,28,28,.6)',      bg:['#200000','#3a0000'],
+   enemies:['🐲 ドラゴンキング（ボス）'],    math:'２けた＋ひきざん＋かけざん',
+   story:'最強の敵ドラゴンキングが現れた！\nスターハンターズの力を見せろ！',
+   starBg:'#1a0000',particle:'🔥'},
+];
+
+/* ── MAP SCREEN ── */
+function MapScreen({totalStars,completedDiffs,onSelect,onBack,muted,onToggleMute}){
   const curTitle=getTitle(totalStars);
-  const WORLDS=[
-    {id:'easy',name:'まほうの森',sub:'世界の始まり',diff:'やさしい',icon:'🌲',c:'#2e7d32',gl:'rgba(46,125,50,.6)',
-     story:'世界中に闇の力が広がり始めた！\nまずはまほうの森のモンスターをたおして\n森の平和を守ろう！',
-     enemies:['🟣 ダークスライム','👻 ゴーストちゃん'],math:'１けたのたしざん',bg:['#071407','#0f2010']},
-    {id:'normal',name:'ゴーストキャッスル',sub:'呪いを解け',diff:'ふつう',icon:'🏰',c:'#1565c0',gl:'rgba(21,101,192,.6)',
-     story:'森を守った！次は古城の呪いを解こう！\nクモとダークウィッチが待ち受けている...\n仲間と力を合わせて立ち向かえ！',
-     enemies:['🕷️ クモのまじん','🧙 ダークウィッチ'],math:'たしざん＋ひきざん',bg:['#080020','#1a0035']},
-    {id:'hard',name:'ドラゴンキング最終決戦',sub:'世界平和をかけた戦い',diff:'むずかしい',icon:'🐲',c:'#b71c1c',gl:'rgba(183,28,28,.6)',
-     story:'ついに最終決戦！\n最強の敵ドラゴンキングを倒して\n世界に平和をとりもどせ！\nスターハンターズの力を見せろ！',
-     enemies:['🐲 ドラゴンキング（ボス）'],math:'２けた＋ひきざん＋かけざん',bg:['#200000','#3a0000']},
-  ];
+  const nextTitle=getNextTitle(totalStars);
+  const titleProg=nextTitle?Math.min((totalStars-curTitle.stars)/(nextTitle.stars-curTitle.stars)*100,100):100;
   const allDone=completedDiffs.includes('hard');
+  const DOTPATH=Array.from({length:5},(_,i)=>i);
   return(
-    <div style={{background:'linear-gradient(180deg,#0a0020,#1a0035)',minHeight:680,display:'flex',flexDirection:'column',position:'relative'}}>
+    <div style={{background:'linear-gradient(180deg,#04001a 0%,#0a0030 40%,#080018 100%)',minHeight:680,display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+      {/* Stars bg */}
+      {STARS.map((s,i)=><div key={i} style={{position:'absolute',width:s.s,height:s.s,background:'white',borderRadius:'50%',left:s.x+'%',top:s.y+'%',opacity:.12,animation:`twinkle ${s.d}s ease-in-out infinite`,animationDelay:s.dl+'s'}}/>)}
       {/* Header */}
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 20px 0',flexShrink:0}}>
-        <button onClick={onClose} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 15px',color:'white',fontWeight:800,fontSize:13}}>← もどる</button>
-        <div style={{color:'#ce93d8',fontWeight:900,fontSize:14,letterSpacing:1}}>🗺️ ロードマップ</div>
-        <div style={{width:70}}/>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 18px 0',zIndex:2,flexShrink:0}}>
+        <button onClick={onBack} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 14px',color:'white',fontWeight:800,fontSize:13}}>← もどる</button>
+        <div style={{color:'#ce93d8',fontWeight:900,fontSize:15,letterSpacing:1}}>🗺️ 世界平和への道</div>
+        <button onClick={onToggleMute} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 10px',color:'white',fontWeight:800,fontSize:16}}>{muted?'🔇':'🔊'}</button>
       </div>
-      {/* Title */}
-      <div style={{textAlign:'center',padding:'10px 20px 6px',flexShrink:0}}>
-        <div style={{fontSize:22,fontWeight:900,color:'white',textShadow:'0 0 20px rgba(255,255,255,.3)'}}>🌍 世界平和への道</div>
-        <div style={{fontSize:11,color:'#9575cd',marginTop:2,fontWeight:700}}>スターハンターズの冒険ロードマップ</div>
-        <div style={{display:'inline-flex',gap:6,alignItems:'center',background:'rgba(255,255,255,.06)',borderRadius:12,padding:'5px 12px',marginTop:8,border:'1px solid rgba(255,255,255,.1)'}}>
-          <span style={{fontSize:18}}>{curTitle.icon}</span>
-          <span style={{color:curTitle.color,fontWeight:800,fontSize:12}}>{curTitle.title}</span>
-          <span style={{color:'rgba(255,255,255,.4)',fontSize:11}}>⭐ {totalStars}</span>
+      {/* Profile bar */}
+      <div style={{margin:'10px 16px 0',background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.09)',borderRadius:14,padding:'9px 14px',zIndex:2,flexShrink:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <span style={{fontSize:22}}>{curTitle.icon}</span>
+          <div style={{flex:1}}>
+            <div style={{color:curTitle.color,fontWeight:900,fontSize:13}}>{curTitle.title}</div>
+            <div style={{color:'rgba(255,255,255,.4)',fontSize:11}}>⭐ {totalStars} スター</div>
+          </div>
+          {nextTitle&&<div style={{textAlign:'right'}}>
+            <div style={{color:'rgba(255,255,255,.3)',fontSize:10}}>つぎまで</div>
+            <div style={{color:nextTitle.color,fontSize:11,fontWeight:800}}>{nextTitle.stars-totalStars}⭐</div>
+          </div>}
         </div>
+        {nextTitle&&<div style={{background:'rgba(255,255,255,.08)',borderRadius:4,height:5,overflow:'hidden',marginTop:6}}>
+          <div style={{height:'100%',background:`linear-gradient(90deg,${curTitle.color},${nextTitle.color})`,width:titleProg+'%',borderRadius:4,transition:'width .5s'}}/>
+        </div>}
       </div>
-      {/* Scrollable content */}
-      <div style={{flex:1,overflowY:'auto',padding:'8px 16px 20px'}}>
-        {/* World stages */}
+      {/* Map stages */}
+      <div style={{flex:1,overflowY:'auto',padding:'10px 16px 16px',zIndex:2}}>
         {WORLDS.map((w,i)=>{
           const done=completedDiffs.includes(w.id);
           return(
             <div key={w.id}>
-              <div style={{background:`linear-gradient(135deg,${w.bg[0]},${w.bg[1]})`,border:`2px solid ${done?'#4caf50':w.c}66`,borderRadius:20,padding:'14px 16px',position:'relative',marginBottom:4}}>
-                {done&&<div style={{position:'absolute',top:10,right:12,fontSize:22}}>✅</div>}
-                {/* World header */}
-                <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:8}}>
-                  <div style={{fontSize:38,filter:`drop-shadow(0 0 10px ${w.c})`}}>{w.icon}</div>
-                  <div>
-                    <div style={{color:w.c,fontSize:9,fontWeight:900,letterSpacing:3,marginBottom:2}}>{w.diff.toUpperCase()}</div>
-                    <div style={{color:'white',fontSize:16,fontWeight:900,lineHeight:1.2}}>{w.name}</div>
-                    <div style={{color:'rgba(255,255,255,.45)',fontSize:10,marginTop:1}}>{w.sub}</div>
+              <button onClick={()=>{if(!muted)SFX.mapTap();onSelect(w.id);}}
+                style={{width:'100%',background:`linear-gradient(135deg,${w.bg[0]},${w.bg[1]})`,border:`2px solid ${done?'#4caf50':w.c}88`,borderRadius:22,padding:'14px 16px',textAlign:'left',display:'flex',gap:14,alignItems:'center',position:'relative',overflow:'hidden',boxShadow:`0 6px 28px ${w.gl}`,marginBottom:0,animation:'stageGlow 3s ease-in-out infinite',animationDelay:`${i*.7}s`}}>
+                {/* Completion badge */}
+                {done&&<div style={{position:'absolute',top:10,right:12,background:'#4caf50',borderRadius:'50%',width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,boxShadow:'0 0 12px rgba(76,175,80,.6)'}}>✅</div>}
+                {/* Icon */}
+                <div style={{fontSize:50,filter:`drop-shadow(0 0 14px ${w.c})`,flexShrink:0,lineHeight:1}}>{w.icon}</div>
+                <div style={{flex:1}}>
+                  <div style={{color:w.c,fontSize:9,fontWeight:900,letterSpacing:3,marginBottom:2}}>{w.id==='easy'?'STAGE 1':w.id==='normal'?'STAGE 2':'STAGE 3 FINAL'}</div>
+                  <div style={{color:'white',fontSize:17,fontWeight:900,lineHeight:1.2,marginBottom:3}}>{w.name}</div>
+                  <div style={{color:'rgba(255,255,255,.5)',fontSize:11,marginBottom:6}}>{w.sub}</div>
+                  <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+                    {w.enemies.map((e,j)=><div key={j} style={{background:'rgba(255,255,255,.08)',borderRadius:7,padding:'2px 7px',fontSize:10,color:'rgba(255,255,255,.6)'}}>{e}</div>)}
+                  </div>
+                  <div style={{marginTop:5,display:'inline-block',background:w.c+'22',borderRadius:7,padding:'2px 8px',border:`1px solid ${w.c}44`}}>
+                    <span style={{color:w.c,fontSize:10,fontWeight:800}}>📐 {w.math}</span>
                   </div>
                 </div>
-                {/* Story */}
-                <div style={{background:'rgba(0,0,0,.25)',borderRadius:10,padding:'8px 12px',marginBottom:8,border:'1px solid rgba(255,255,255,.06)'}}>
-                  <div style={{color:'rgba(255,255,255,.75)',fontSize:12,lineHeight:1.8,whiteSpace:'pre-line'}}>{w.story}</div>
-                </div>
-                {/* Enemies */}
-                <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:6}}>
-                  {w.enemies.map((e,j)=><div key={j} style={{background:'rgba(255,255,255,.08)',borderRadius:8,padding:'3px 8px',fontSize:11,color:'rgba(255,255,255,.65)',border:'1px solid rgba(255,255,255,.08)'}}>{e}</div>)}
-                </div>
-                {/* Math */}
-                <div style={{background:w.c+'22',borderRadius:8,padding:'3px 10px',display:'inline-block',border:`1px solid ${w.c}44`}}>
-                  <span style={{color:w.c,fontSize:11,fontWeight:800}}>📐 {w.math}</span>
-                </div>
-              </div>
-              {/* Connector arrow */}
-              {i<WORLDS.length-1&&<div style={{textAlign:'center',fontSize:16,padding:'4px 0',color:'rgba(255,255,255,.2)'}}>⬇</div>}
+              </button>
+              {/* Dotted path connector */}
+              {i<WORLDS.length-1&&<div style={{display:'flex',justifyContent:'center',padding:'6px 0',gap:5}}>
+                {DOTPATH.map(j=><div key={j} style={{width:5,height:5,borderRadius:'50%',background:'rgba(255,255,255,.2)',animation:`pathDot ${1+j*.2}s ease-in-out infinite`,animationDelay:`${j*.15}s`}}/>)}
+              </div>}
             </div>
           );
         })}
         {/* World Peace Goal */}
-        <div style={{marginTop:8,background:allDone?'linear-gradient(135deg,rgba(255,215,0,.12),rgba(76,175,80,.12))':'rgba(255,255,255,.04)',border:`2px solid ${allDone?'#ffd700':'rgba(255,255,255,.1)'}`,borderRadius:20,padding:'18px',textAlign:'center'}}>
-          <div style={{fontSize:allDone?56:44,marginBottom:8}}>{allDone?'🕊️✨':'🕊️'}</div>
-          <div style={{color:allDone?'#ffd700':'rgba(255,255,255,.6)',fontSize:20,fontWeight:900,marginBottom:6}}>{allDone?'🌍 世界平和 達成！':'🌍 世界平和'}</div>
-          <div style={{color:'rgba(255,255,255,.5)',fontSize:12,lineHeight:1.8}}>{allDone?'すべてのモンスターをたおして\n世界に平和をとりもどした！\nスターハンターズのヒーローだ！':'むずかしいモードをクリアして\n世界中に平和をとりもどそう！\nスターハンターズの力を見せろ！'}</div>
+        <div style={{marginTop:10,background:allDone?'linear-gradient(135deg,rgba(255,215,0,.12),rgba(76,175,80,.1))':'rgba(255,255,255,.03)',border:`2px solid ${allDone?'#ffd700':'rgba(255,255,255,.08)'}`,borderRadius:20,padding:'18px',textAlign:'center'}}>
+          <div style={{fontSize:allDone?56:44,marginBottom:6}}>{allDone?'🕊️✨':'🕊️'}</div>
+          <div style={{color:allDone?'#ffd700':'rgba(255,255,255,.4)',fontSize:18,fontWeight:900,marginBottom:4}}>{allDone?'🌍 世界平和 達成！！':'🌍 世界平和 GOAL'}</div>
+          <div style={{color:'rgba(255,255,255,.4)',fontSize:11,lineHeight:1.8}}>{allDone?'全ステージクリア！\nきみは真のスターハンターズのヒーローだ！':'むずかしいステージをクリアして\n世界に平和をとりもどそう！'}</div>
         </div>
         {/* Title roadmap */}
-        <div style={{marginTop:12,background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:20,padding:'14px 16px'}}>
-          <div style={{color:'white',fontWeight:900,fontSize:13,marginBottom:10}}>🏅 称号ロードマップ</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
-            {TITLES.map((t,i)=>{
-              const got=totalStars>=t.stars;
-              return(
-                <div key={i} style={{display:'flex',alignItems:'center',gap:6,background:got?'rgba(255,255,255,.07)':'rgba(255,255,255,.02)',borderRadius:10,padding:'6px 8px',border:got?`1px solid ${t.color}33`:'1px solid rgba(255,255,255,.04)',opacity:got?1:.5}}>
-                  <span style={{fontSize:18}}>{t.icon}</span>
-                  <div>
-                    <div style={{color:got?t.color:'rgba(255,255,255,.4)',fontWeight:800,fontSize:10,lineHeight:1.2}}>{t.title}</div>
-                    <div style={{color:'rgba(255,255,255,.3)',fontSize:9}}>⭐ {t.stars}〜</div>
-                  </div>
-                  {got&&<span style={{fontSize:12,marginLeft:'auto'}}>✓</span>}
+        <div style={{marginTop:10,background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.07)',borderRadius:18,padding:'12px 14px'}}>
+          <div style={{color:'white',fontWeight:900,fontSize:12,marginBottom:8}}>🏅 称号ロードマップ</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5}}>
+            {TITLES.map((t,i)=>{const got=totalStars>=t.stars;return(
+              <div key={i} style={{display:'flex',alignItems:'center',gap:5,background:got?'rgba(255,255,255,.06)':'rgba(255,255,255,.02)',borderRadius:9,padding:'5px 7px',border:got?`1px solid ${t.color}33`:'1px solid rgba(255,255,255,.04)',opacity:got?1:.45}}>
+                <span style={{fontSize:16}}>{t.icon}</span>
+                <div style={{flex:1}}>
+                  <div style={{color:got?t.color:'rgba(255,255,255,.4)',fontWeight:800,fontSize:9,lineHeight:1.2}}>{t.title}</div>
+                  <div style={{color:'rgba(255,255,255,.25)',fontSize:8}}>⭐{t.stars}〜</div>
                 </div>
-              );
-            })}
+                {got&&<span style={{fontSize:10,color:'#4caf50'}}>✓</span>}
+              </div>
+            );})}
           </div>
         </div>
       </div>
@@ -356,7 +443,7 @@ function TitleOverlay({data,onClose}){
 
 /* ── MAIN APP ── */
 function App(){
-  const saved=loadSave();
+  // Fix #1: lazy initialization — loadSave runs ONCE, not on every render
   const[scr,setScr]=useState('title');
   const[diff,setDiff]=useState(null);
   const[cid,setCid]=useState(null);
@@ -369,8 +456,8 @@ function App(){
   const[php,setPhp]=useState(3);
   const[streak,setStreak]=useState(0);
   const[stars,setStars]=useState(0);
-  const[totalStars,setTotalStars]=useState(saved.ts);
-  const[completedDiffs,setCompletedDiffs]=useState(saved.cd);
+  const[totalStars,setTotalStars]=useState(()=>loadSave().ts);
+  const[completedDiffs,setCompletedDiffs]=useState(()=>loadSave().cd);
   const[prob,setProb]=useState(null);
   const[chs,setChs]=useState([]);
   const[wrong,setWrong]=useState(false);
@@ -383,6 +470,17 @@ function App(){
   const[showRoadmap,setShowRoadmap]=useState(false);
   const[showCostume,setShowCostume]=useState(false);
   const[cosTab,setCosTab]=useState('hair');
+  const[muted,setMuted]=useState(false);
+  // Fix #3: answering guard — prevents double-tap during animation
+  const ansLock=useRef(false);
+  function toggleMute(){setMuted(m=>{const nm=!m;if(nm)stopBGM();return nm;});}
+
+  /* BGM management */
+  useEffect(()=>{
+    if(scr==='battle'&&!muted){startBGM();}
+    else{stopBGM();}
+    return()=>stopBGM();
+  },[scr,muted]);
   /* v5: attack effects */
   const[efx,setEfx]=useState([]);
   const[isSh,setIsSh]=useState(false);
@@ -397,7 +495,7 @@ function App(){
     const nt=curTotal+amt;
     const oldT=getTitle(curTotal),newT=getTitle(nt);
     setTotalStars(nt);setStars(s=>s+amt);
-    if(newT.title!==oldT.title)setTitleOverlay(newT);
+    if(newT.title!==oldT.title){setTitleOverlay(newT);if(!muted)SFX.unlock();}
     return nt;
   }
 
@@ -411,6 +509,7 @@ function App(){
     const s=SEQ[idx];
     if(s.t==='story'){setStory(STORIES[s.k]);setScr('story');}
     else{
+      ansLock.current=false; // reset lock for new battle
       const e=ENEMIES[s.ei];setEidx(s.ei);setEhp(e.hp);setPhp(3);setStreak(0);
       setWrong(false);setBmsg('');
       const p=genProb(diff,s.ei);setProb(p);setChs(makeChoices(p.ans));setQn(1);
@@ -435,7 +534,11 @@ function App(){
   }
 
   function doAnswer(v){
-    if(!prob)return;
+    // Fix #3: block double-taps during animation
+    if(!prob||ansLock.current)return;
+    ansLock.current=true;
+    // Fix #6: capture seqIdx NOW to avoid stale closure in setTimeout
+    const currentSeqIdx=seqIdx;
     if(v===prob.ans){
       const ns=streak+1;setStreak(ns);
       const dmg=ns>=3?3:ns>=2?2:1;
@@ -466,12 +569,18 @@ function App(){
       const newTS=addStars(dmg,totalStars);
       const msg=ns>=3?'🔥 クリティカル！×3！':ns>=2?'✨ コンボ！×2！':'💥 ヒット！';
       setBmsg(msg);
+      if(!muted){ns>=3?SFX.critical():ns>=2?SFX.combo():SFX.correct();SFX.attack(cid);}
       if(neh<=0){
         doSave(newTS,completedDiffs);
         setPanim('victory');
-        setTimeout(()=>advance(seqIdx),1050);
+        if(!muted)setTimeout(()=>SFX.victory(),300);
+        setTimeout(()=>advance(currentSeqIdx),1050);
+        // lock stays on — screen will change
       }else{
-        setTimeout(()=>{const p=genProb(diff,eidx);setProb(p);setChs(makeChoices(p.ans));setWrong(false);setQn(q=>q+1);},920);
+        setTimeout(()=>{
+          const p=genProb(diff,eidx);setProb(p);setChs(makeChoices(p.ans));setWrong(false);setQn(q=>q+1);
+          ansLock.current=false; // unlock for next question
+        },920);
       }
     }else{
       setStreak(0);setWrong(true);setWkey(k=>k+1);
@@ -493,11 +602,19 @@ function App(){
         setIsSh(true);setTimeout(()=>setIsSh(false),420);
       },390);
       setBmsg('❌ まちがい！'+enemy.n+'のこうげき！');
-      if(np<=0)setTimeout(()=>setScr('defeat'),920);
+      if(!muted)SFX.wrong();
+      if(np<=0){
+        if(!muted)setTimeout(()=>SFX.defeat(),300);
+        setTimeout(()=>setScr('defeat'),920);
+        // lock stays on — screen will change
+      }else{
+        setTimeout(()=>{ansLock.current=false;},780); // unlock after hurt anim
+      }
     }
   }
 
   function retryBattle(){
+    ansLock.current=false; // reset lock on retry
     const s=SEQ[seqIdx];const e=ENEMIES[s.ei];
     setEhp(e.hp);setPhp(3);setStreak(0);setWrong(false);setBmsg('');
     const p=genProb(diff,s.ei);setProb(p);setChs(makeChoices(p.ans));setQn(1);
@@ -508,8 +625,8 @@ function App(){
   const nextTitle=getNextTitle(totalStars);
   const titleProg=nextTitle?Math.min((totalStars-curTitle.stars)/(nextTitle.stars-curTitle.stars)*100,100):100;
 
-  /* ══ ROADMAP ══ */
-  if(showRoadmap)return <RoadmapScreen totalStars={totalStars} completedDiffs={completedDiffs} onClose={()=>setShowRoadmap(false)}/>;
+  /* ══ MAP (stage select + roadmap) ══ */
+  if(showRoadmap)return <MapScreen totalStars={totalStars} completedDiffs={completedDiffs} onSelect={(d)=>{setDiff(d);setShowRoadmap(false);setScr('charselect');}} onBack={()=>setShowRoadmap(false)} muted={muted} onToggleMute={toggleMute}/>;
 
   /* ══ TITLE SCREEN ══ */
   if(scr==='title')return(
@@ -527,6 +644,7 @@ function App(){
             <div style={{color:'rgba(255,255,255,.45)',fontSize:11}}>⭐ {totalStars} スター</div>
           </div>
           <button onClick={()=>setShowRoadmap(true)} style={{background:'rgba(255,255,255,.1)',border:'1px solid rgba(255,255,255,.2)',borderRadius:10,padding:'6px 10px',color:'white',fontWeight:800,fontSize:11}}>🗺️ MAP</button>
+          <button onClick={toggleMute} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:10,padding:'6px 9px',color:'white',fontWeight:800,fontSize:14}}>{muted?'🔇':'🔊'}</button>
         </div>
         {nextTitle&&<div>
           <div style={{background:'rgba(255,255,255,.1)',borderRadius:6,height:7,overflow:'hidden',marginBottom:3}}>
@@ -569,34 +687,9 @@ function App(){
         })}
       </div>
 
-      <button onClick={()=>setScr('difficulty')} className="apulse" style={{background:'linear-gradient(135deg,#7c4dff,#e040fb)',border:'none',borderRadius:28,padding:'17px 52px',color:'white',fontSize:18,fontWeight:900,letterSpacing:2,boxShadow:'0 8px 30px rgba(124,77,255,.55)',zIndex:2}}>
-        はじめる！ ✨
+      <button onClick={()=>{if(!muted)SFX.titleTap();setShowRoadmap(true);}} className="apulse" style={{background:'linear-gradient(135deg,#7c4dff,#e040fb)',border:'none',borderRadius:28,padding:'17px 52px',color:'white',fontSize:18,fontWeight:900,letterSpacing:2,boxShadow:'0 8px 30px rgba(124,77,255,.55)',zIndex:2}}>
+        ぼうけんへ！ 🗺️
       </button>
-    </div>
-  );
-
-  /* ══ DIFFICULTY ══ */
-  if(scr==='difficulty')return(
-    <div className="afin" style={{background:'linear-gradient(180deg,#0a0020,#1a0035)',minHeight:680,padding:20,display:'flex',flexDirection:'column'}}>
-      {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
-        <button onClick={()=>setScr('title')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 15px',color:'white',fontWeight:800,fontSize:13}}>← もどる</button>
-        <div style={{color:'#ce93d8',fontWeight:900,fontSize:15}}>難易度をえらぼう</div>
-        <div style={{width:70}}/>
-      </div>
-      <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'center',gap:14}}>
-        {DIFFS.map(d=>(
-          <button key={d.id} onClick={()=>{setDiff(d.id);setScr('charselect');}} style={{background:`linear-gradient(135deg,${d.c}22,${d.c}44)`,border:`2px solid ${d.c}66`,borderRadius:22,padding:'22px 18px',display:'flex',alignItems:'center',gap:16,textAlign:'left',boxShadow:`0 4px 22px ${d.gl}`}}>
-            <div style={{fontSize:44,flexShrink:0}}>{d.e}</div>
-            <div>
-              <div style={{color:d.c,fontSize:10,fontWeight:900,letterSpacing:3,marginBottom:4}}>{d.n.toUpperCase()}</div>
-              <div style={{color:'white',fontSize:22,fontWeight:900,marginBottom:4}}>{d.n}</div>
-              <div style={{color:'rgba(255,255,255,.6)',fontSize:13}}>{d.desc}</div>
-            </div>
-          </button>
-        ))}
-      </div>
-      <div style={{textAlign:'center',marginTop:16,color:'rgba(255,255,255,.3)',fontSize:12}}>難しいほど⭐がたくさん集まるよ！</div>
     </div>
   );
 
@@ -605,7 +698,7 @@ function App(){
     <div className="afin" style={{background:'linear-gradient(180deg,#0a0020,#1a0035)',minHeight:680,padding:20,display:'flex',flexDirection:'column'}}>
       {titleOverlay&&<TitleOverlay data={titleOverlay} onClose={()=>setTitleOverlay(null)}/>}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-        <button onClick={()=>setScr('difficulty')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 15px',color:'white',fontWeight:800,fontSize:13}}>← もどる</button>
+        <button onClick={()=>setShowRoadmap(true)} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',borderRadius:14,padding:'8px 15px',color:'white',fontWeight:800,fontSize:13}}>← マップへ</button>
         <div style={{color:'#ce93d8',fontWeight:900,fontSize:15}}>キャラをえらぼう</div>
         <div style={{width:70}}/>
       </div>
@@ -790,6 +883,7 @@ function App(){
         </div>
         <div style={{display:'flex',alignItems:'center',gap:5}}>
           <button onClick={()=>{setShowCostume(true);setCosTab('hair');}} style={{background:`linear-gradient(135deg,${char?.ac||'#7c4dff'}44,${char?.ac||'#7c4dff'}22)`,border:`1px solid ${char?.ac||'#7c4dff'}66`,borderRadius:10,padding:'5px 9px',color:'white',fontWeight:900,fontSize:14}}>👗</button>
+          <button onClick={toggleMute} style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(255,255,255,.12)',borderRadius:10,padding:'5px 8px',color:'white',fontWeight:900,fontSize:14}}>{muted?'🔇':'🔊'}</button>
           <div style={{display:'flex',gap:3}}>{[0,1,2].map(i=><span key={i} style={{fontSize:18,filter:i<php?'none':'grayscale(1)',transition:'filter .3s'}}>❤️</span>)}</div>
         </div>
       </div>
